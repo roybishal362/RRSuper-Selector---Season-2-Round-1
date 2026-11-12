@@ -49,7 +49,7 @@ in exactly the same situation, and tests the picks on matches the model never sa
 
 **Batters** · strike rate on pressure balls
 
-| # | Batter | Him | Average | Stays top 10* |
+| # | Batter | Under pressure | Average player | Stays top 10* |
 |---:|---|---:|---:|---:|
 | 1 | Abhishek Sharma | **184** | 156 | 93% |
 | 2 | Suryakumar Yadav | **167** | 149 | 93% |
@@ -67,7 +67,7 @@ in exactly the same situation, and tests the picks on matches the model never sa
 
 **Bowlers** · economy on pressure balls (lower is better)
 
-| # | Bowler | Him | Average | Stays top 10* |
+| # | Bowler | Under pressure | Average player | Stays top 10* |
 |---:|---|---:|---:|---:|
 | 1 | Jasprit Bumrah | **8.20** | 10.03 | 93% |
 | 2 | Lungi Ngidi | **8.96** | 9.95 | 64% |
