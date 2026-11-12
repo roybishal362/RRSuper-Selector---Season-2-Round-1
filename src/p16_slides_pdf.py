@@ -308,7 +308,7 @@ def vs(label, us, typ, top, fmt):
     w = lambda x: f"{34 * x / top:.1f}mm"
     return (f'<div class="vl">{label}</div>'
             f'<div class="vr"><span class="vb us" style="width:{w(us)}"></span><b>{fmt(us)}</b></div>'
-            f'<div class="vr"><span class="vb ty" style="width:{w(typ)}"></span><em>{fmt(typ)} typical</em></div>')
+            f'<div class="vr"><span class="vb ty" style="width:{w(typ)}"></span><em>{fmt(typ)} average</em></div>')
 
 
 def card(r, side):
