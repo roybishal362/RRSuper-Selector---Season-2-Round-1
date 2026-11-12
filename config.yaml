@@ -1,0 +1,91 @@
+# SupeRR Selector S2 - Round 1. Every threshold, weight, seed and path lives here.
+seed: 2026
+n_jobs: 14
+
+paths:
+  raw: 6af3166e7b922_data_pack
+  out: outputs
+
+data:
+  main_innings: [1, 2]          # 3/4 are super overs -> sensitivity only
+  illegal_extras: [wide, Overstep, other]
+  noball_extras: [Overstep, other]
+  bye_extras: [byes, legbyes]
+  bowler_wicket_exclude: [RunOut, Retire Out, Obstracting the field, Obstructing the field]
+  full_members: [India, Australia, England, South Africa, New Zealand, Pakistan, Sri Lanka,
+                 West Indies, Bangladesh, Afghanistan, Ireland, Zimbabwe]
+  # UTC offsets (hours) used only for day/night of T20I venues
+  tz_offset: {India: 5.5, United Arab Emirates: 4, New Zealand: 13, United Kingdom: 1, West Indies: -4,
+              Zimbabwe: 2, Pakistan: 5, Bangladesh: 6, Sri Lanka: 5.5, Australia: 10, Oman: 4,
+              South Africa: 2, Qatar: 3, Netherlands: 2, Ireland: 1, United States: -4, Japan: 9}
+
+cv:
+  n_folds: 5                     # GroupKFold by match_id
+  holdout_season: 2026           # sealed until the final confirmation
+  rolling: [[[2022, 2023], 2024], [[2022, 2023, 2024], 2025]]
+  random_splits: 50
+
+models:
+  lgb_common: {learning_rate: 0.03, num_leaves: 31, min_child_samples: 200, subsample: 0.8,
+               subsample_freq: 1, colsample_bytree: 0.8, reg_lambda: 5.0, verbose: -1}
+  optuna_trials: 12
+  wp_calibration_max_ece: 0.03
+  first_innings_auc_gate: 0.72
+
+baseline:
+  # expected outcomes are for an average bowler OF THE SAME TYPE (pace / spin) in the same situation
+  # (a role, like a fielding position - teams must bowl pace at the death; a spinner cannot replace a death bowler)
+  bowler_type: true
+
+pressure:
+  # match importance by design (the swing test cannot see how much a match matters)
+  importance: {knockout: 1.5, must_win: 1.25, dead_rubber: 0.75}
+  importance_sensitivity: [1.0, 1.25, 2.0]
+  hard_cuts: [0.10, 0.15, 0.20, 0.25, 0.30]
+  alphas: [0.5, 1.0, 2.0]
+  t3_min_share: 0.02
+  t3_min_players: 50
+  t3_min_balls: 30
+  fdr_q: 0.05
+  boot_reps: 300
+
+ratings:
+  bootstrap_reps: 1000
+  ci: 0.90
+
+selection:
+  w_d_grid: [0.0, 0.25, 0.5, 1.0]
+  w_c_grid: [0.0, 0.25, 0.5]
+  k_mult_grid: [0.5, 1.0, 2.0]
+  min_pressure_balls_grid: [0, 30, 60, 100]
+  # Rating-model family fixed by design for BOTH sides (2026-11-12 review): pressure-weighted (every ball counts,
+  # weighted by its pressure percentile), so batters and bowlers get the identical pressure treatment and first-innings
+  # pressure keeps ~41% of the weight. The data still chooses alpha (Stage B), gap/consistency weights (C), shrinkage and
+  # minimum sample (D). All other models are still evaluated and reported: the best overall is logged next to the pick.
+  # Evidence: batters tied in-sample and better on the public-data exam; bowlers: R3 wins the internal test (whose
+  # yardstick scores the same hard pressure balls R3 rates), the old pressure-weighted top 10 did better in 4 of 5
+  # independent comparisons (2026 + public subgroups).
+  model_family: {bat: R2-weighted, bowl: R2-weighted}
+  # Review decision (2026-11-12): bowlers use emphasis alpha 0.5 and shrinkage x2. The stage-by-stage search reached
+  # alpha 1.0 / x1 (it tunes one setting at a time and never tried alpha 0.5 with x2). P14b (table
+  # rating_family_check_decision_evidence) found alpha 0.5 / x2 better in 8 of 11 comparisons: the 50 random splits
+  # (paired +0.016, SE 0.004), 2026 (rank corr and top-10) and 5 of 8 public-data comparisons. It also shrinks small
+  # samples harder. The rule's own pick is kept in p09_summary['rule_pick'] and compared in P14b.
+  override: {bowl: {alpha: 0.5, k_mult: 2.0}}
+  # Evidence floor for BOTH lists: to be ranked under pressure a player needs >= 60 pressure balls. P9 chose 60 for
+  # batters itself; its yardstick only scores players with enough test-match pressure balls, so it cannot see (or
+  # penalise) low-exposure players and cannot choose this for bowlers.
+  min_pressure_balls_floor: 60
+
+eligibility:
+  # Not available for IPL selection: players who appeared for these national sides in the supplied data
+  # (25 = Pakistan, 341 = Pakistan A). Their balls stay in every 'average player' baseline and in all method tests;
+  # they are only left out of the final lists (listed separately in the report with the rank they would have had).
+  exclude_national_team_ids: [25, 341]
+  exclude_reason: "not available for IPL selection"
+  # Review decision (2026-11-13): RR can only pick players who are still playing. A player with no match in the
+  # supplied data in 2025 or 2026 (e.g. Dinesh Karthik, retired 2024) is rated, stays in every baseline and every
+  # method test, but is left out of the final lists. The data cannot tell retirement from absence, so every player
+  # this removes from a top 20 is listed in the report.
+  require_active_from: 2025
+  inactive_reason: "no match in 2025 or 2026 (inactive or retired)"

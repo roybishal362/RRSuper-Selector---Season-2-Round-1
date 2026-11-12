@@ -1,0 +1,5 @@
+target,check,train_logloss,test_logloss,matches,distinct_match_input_combos,balls_per_match
+chase,"Spline logistic, match-constant inputs only",0.5454573205543346,0.5880077688322296,820,820,112.74634146341464
+chase,"Flexible LightGBM, match-constant inputs only",0.00010000500033334732,1.9271373953549984,820,820,112.74634146341464
+first,"Spline logistic, match-constant inputs only",0.6589026038891123,0.7061272265044816,823,823,123.60267314702308
+first,"Flexible LightGBM, match-constant inputs only",0.0010475340682872681,2.1979983961883307,823,823,123.60267314702308

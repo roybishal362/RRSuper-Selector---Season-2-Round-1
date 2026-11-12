@@ -1,0 +1,43 @@
+model,situation,times_seen,actual_win_rate,model_win_prob
+Plain logistic (straight lines),"4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.12445840485160685
+Plain logistic (straight lines),"5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.015365465635995182
+Plain logistic (straight lines),"8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.7345299247577309
+Plain logistic (straight lines),"13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.46155637694599105
+Plain logistic (straight lines),"15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.7830950259909062
+Plain logistic (straight lines),"21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.5520677500192197
+Plain logistic (straight lines),"25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.7476831370628065
+Previous: curves on every input (6 knots),"4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.278052209616387
+Previous: curves on every input (6 knots),"5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.07231665538312111
+Previous: curves on every input (6 knots),"8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.8543762647168539
+Previous: curves on every input (6 knots),"13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.6421221664204484
+Previous: curves on every input (6 knots),"15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.8753147749345869
+Previous: curves on every input (6 knots),"21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.7046823577533177
+Previous: curves on every input (6 knots),"25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.8243964335242691
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.22287515622558612
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.041002455409642195
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.858674760433431
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.6156141834599205
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.8750994658308493
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.6582077877795802
+"CHOSEN: curves for game state, straight lines for match context (4 knots)","25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.8180642256665488
+"Curves for game state (6 knots), straight lines for match context","4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.24539644652385068
+"Curves for game state (6 knots), straight lines for match context","5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.07190026739324115
+"Curves for game state (6 knots), straight lines for match context","8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.8759474059598258
+"Curves for game state (6 knots), straight lines for match context","13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.6312293219009462
+"Curves for game state (6 knots), straight lines for match context","15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.8820945571326125
+"Curves for game state (6 knots), straight lines for match context","21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.6997428687804005
+"Curves for game state (6 knots), straight lines for match context","25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.8255450959830556
+"  same, stronger penalty (C=0.1)","4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.18590144106197218
+"  same, stronger penalty (C=0.1)","5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.10443713771499408
+"  same, stronger penalty (C=0.1)","8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.8527821759288929
+"  same, stronger penalty (C=0.1)","13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.5401717548771359
+"  same, stronger penalty (C=0.1)","15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.8707324114927321
+"  same, stronger penalty (C=0.1)","21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.6696451149360644
+"  same, stronger penalty (C=0.1)","25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.8224485940768439
+Curves for game state only (no match context),"4-4 needed off 1 ball(s), 4+ wickets",4,0.25,0.2904514285377996
+Curves for game state only (no match context),"5-6 needed off 1 ball(s), 4+ wickets",3,0.0,0.10652148175575475
+Curves for game state only (no match context),"8-12 needed off 6 ball(s), 4+ wickets",45,0.8,0.8778895074905163
+Curves for game state only (no match context),"13-16 needed off 6 ball(s), 4+ wickets",32,0.65625,0.5877989961744078
+Curves for game state only (no match context),"15-20 needed off 12 ball(s), 4+ wickets",60,0.8333333333333334,0.8919323515447003
+Curves for game state only (no match context),"21-26 needed off 12 ball(s), 4+ wickets",50,0.64,0.697999057283861
+Curves for game state only (no match context),"25-32 needed off 18 ball(s), 4+ wickets",87,0.8160919540229885,0.8316361270970349

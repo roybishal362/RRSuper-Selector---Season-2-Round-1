@@ -1,0 +1,20 @@
+# Allow-list. Only code, settings and documentation are tracked.
+# The supplied competition data, everything derived from it at ball level, the Cricsheet downloads,
+# model files, player photos and team branding must never be committed.
+/*
+!/.gitignore
+!/README.md
+!/requirements.txt
+!/config.yaml
+!/src/
+!/docs/
+
+# inside src: no caches, no superseded versions
+/src/__pycache__/
+/src/*_v1*.py
+/src/p15_report_pdf.py
+*.pyc
+*.parquet
+*.zip
+*.joblib
+*.pkl
