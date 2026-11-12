@@ -128,7 +128,7 @@ Every ball gets a pressure score in three steps:
 <sub>Where pressure is highest in a chase. Each square is one situation, such as "over 17, 4 wickets down". The darker the pink, the more pressure.</sub>
 </div>
 
-**Why do 9 in 10 pressure balls come in chases?** In a chase both teams know the target, so every run and every wicket changes the result directly. Batting first, nobody knows yet what a winning score is. This is not a quirk of my model: in every league I checked, 80% to 94% of pressure balls came in chases. First-innings balls still count, because every ball counts in the rating and a higher-pressure ball just counts more. In total, 41% of what goes into the ratings comes from the first innings.
+**Why do 9 in 10 pressure balls come in chases?** In a chase both teams know the target, so every run and every wicket changes the result directly. Batting first, nobody knows yet what a winning score is. This is not a quirk of my model: in every league I checked, 80% to 94% of pressure balls came in chases. First-innings balls still count, because every ball counts in the rating and a higher-pressure ball just counts more. Overall, first-innings balls make up about 41% of the ratings.
 
 ## How it works
 
@@ -156,12 +156,12 @@ flowchart LR
 
 **Why not compare a player with his own normal game?** The brief talks about players' usual levels, so I tested this first.
 - For every player I measured pressure performance minus normal performance. Then I split his matches into two halves.
-- Players who rose under pressure in one half did not do it again in the other. Even fake, randomly chosen "pressure balls" showed the same pattern.
+- Players who rose under pressure in one half did not do it again in the other. And when I picked "pressure balls" at random, players looked just as different.
 - Rising above your own level looks like luck. So the ranking compares each player with everyone else in the same pressure moments, and that does repeat.
 
 ## The machine learning inside
 
-Machine learning sets the yardstick: what is normal in each situation. It never picks a player directly.
+Machine learning is used to work out what is normal in each situation. It never picks a player directly.
 
 | Model | Its job | Why this one |
 |---|---|---|
@@ -208,17 +208,17 @@ Matches also in the supplied data were removed, so nothing counts twice.
 
 > **Where a simpler method did better.**
 > - On the outside matches, picking batters by raw strike rate under pressure gave a better top 10 than mine.
-> - For bowlers, a list built from all balls did slightly better at the very top: 12.7 runs saved against my 10.8. My ranking still put the whole pool of bowlers in a better order.
-> - Inside the supplied data, over the 52 tests, my batting ratings did about 5 times better than raw strike rate. I report all of these.
+> - For bowlers, a top 10 picked from all balls (not just pressure balls) saved slightly more runs: 12.7 against my 10.8. My ranking still put the whole pool of bowlers in a better order.
+> - In the 52 tests on the supplied data, my batting top 10 did about 5 times better than a raw strike rate top 10. I report all of these.
 
 ## Where it could be wrong
 
 - **Batters are hard to judge from one season.**
   - Only about 6% of the difference between batters in one season is skill; the rest is luck.
-  - A batter needs about 800 pressure balls before skill is half of what you see.
+  - A batter needs about 800 pressure balls before skill and luck count equally in his numbers.
   - That's why I used all five seasons, and why the batting list did not hold up on 2026 alone.
 - **The bowling list leans on T20Is.** Built on IPL matches alone, only 4 of the 10 bowlers would stay.
-- **The first innings is harder to read.** First-innings pressure is measured less sharply: no win-chance model reached my own target there.
+- **The first innings is harder to read.** My pressure score is less accurate in the first innings: no win-chance model reached my own target there.
 - **Some things are missing from the data.** There is no fielding, dropped-catch, pitch or weather data.
 - **Some picks rest on fewer balls.** Arya, Carse and Overton have the smallest samples.
 - **2026 is not a perfectly clean test.** I looked at it more than once while building.

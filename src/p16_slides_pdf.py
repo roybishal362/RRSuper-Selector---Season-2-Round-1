@@ -423,7 +423,7 @@ pick one on gut feeling, so I tested them all and let the data decide.</p>
 </div>
 <h3>Proof that pressure balls really are different</h3>
 <div class="fair tight">
-{row("2.2×", "more movement", "The result really swings more",
+{row("2.2×", "bigger change in<br>chance of winning", "The result really changes more",
      "On my pressure balls, the chance of winning moves 2.2 times as much as on an average ball. These are the balls that decide matches.")}
 {row("+8%", "more wickets", "Batters get out more often",
      "On pressure balls, batters get out 8% more often than on other balls at the same stage of an innings (same innings, same overs, same wickets down).")}
@@ -448,8 +448,8 @@ along the band where the chase can still go either way, and fades when the chasi
      "winning score is, so one ball changes less. Real results agree: in the middle overs, a four instead of a dot changed the chasing team's "
      "win rate by 7%, and the first-innings team's by only 3.4%.")}
 {row("41%", "of the rating<br>is first innings", "The first innings still counts",
-     "I don't throw any ball away. Every ball counts, and a ball with more pressure counts more. Added up, 41% of what goes into the ratings "
-     "comes from first-innings balls, so rebuilding at 30 for 3 still matters, for the batter and the bowler.")}
+     "I don't throw any ball away. Every ball counts in the rating, and a ball with more pressure counts more. So first-innings balls are "
+     "not ignored: they make up about 41% of the ratings overall. Rebuilding at 30 for 3 still matters, for the batter and the bowler.")}
 {row("80–94%", "in every<br>league", "It's how T20 works",
      "I checked 3,993 other matches from leagues like the Big Bash, PSL and SA20. In every league, 80% to 94% of pressure balls came in chases. "
      "So this is how T20 cricket is, not a quirk of my model.")}
@@ -465,8 +465,8 @@ along the band where the chase can still go either way, and fades when the chasi
 # 06 the method, step by step (machine learning named in plain words)
 ML = lambda t: f'<span class="mlt">{t}</span>'
 S.append(slide(f"""
-<p class="lede">Here is the whole system from start to finish. Machine learning sets the yardstick (what is normal in each situation).
-It never picks a player directly: every player is judged on whether he beat that yardstick on the balls that mattered.</p>
+<p class="lede">Here is the whole system from start to finish. Machine learning is used to work out what is normal in each situation.
+It never picks a player directly: every player is judged on whether he did better than normal on the balls that mattered.</p>
 <div class="fair steps">
 {row("1", "clean", "Rebuild every ball",
      "I fixed how extras are recorded and rebuilt the score, wickets, target and balls left before each of the 200,961 balls. "
@@ -510,7 +510,7 @@ situations would have scored at 156. That gap, ball by ball, minus what his dism
 {row("Luck?", "rising above your<br>own level", "Why not compare a player with his own normal game?",
      "The brief talks about usual levels, so I tested this first: pressure performance minus normal performance, for every player. Then I "
      "split each player's matches into two halves. Players who rose under pressure in one half did not do it again in the other half. Even "
-     "fake, randomly chosen 'pressure balls' showed the same pattern. It looked like luck, so I rank players on how good they are under "
+     "when I picked 'pressure balls' at random, players looked just as different. It looked like luck, so I rank players on how good they are under "
      "pressure compared with everyone else in the same moments. That did repeat.", "scale")}
 </div>
 <div class="rule wide"><div class="wts"><div><span style="width:95%"></span><em>highest pressure</em></div><div><span style="width:25%"></span><em>ordinary ball</em></div><div><span style="width:4%"></span><em>match already decided</em></div></div>
@@ -579,8 +579,9 @@ bowler would have in the same situations. +4.2 means my top 10 batters scored ab
 <div class="two">
  <div class="box hl"><h4>World Cup semi-finals and finals</h4><p>Bumrah took 9 wickets at 5.45 an over, and Klaasen made 52 off 27 balls.</p></div>
  <div class="box warn"><h4>Where a simpler method did better</h4><p>On these outside matches, picking batters by raw strike rate under
- pressure gave a better top 10 than mine. For bowlers, a list built from all balls did slightly better at the very top (12.7 runs saved
- against my 10.8). But inside RR's data, over the 52 tests, my batting ratings did about 5 times better than raw strike rate.</p></div>
+ pressure gave a better top 10 than mine. For bowlers, a top 10 picked from all balls (not just pressure balls)
+ saved slightly more runs: 12.7 against my 10.8. But in the 52 tests on RR's own data, my batting top 10 did about 5 times better than a
+ raw strike rate top 10.</p></div>
 </div>""", 4, 'Did the picks hold up on <span class="pk">new matches?</span>'))
 
 # 15 limits, deep dive, how to repeat
@@ -588,14 +589,14 @@ S.append(slide(f"""
 <div class="fair tight">
 {row("6%", "skill in one<br>season", "Why one season can't judge a batter",
      "In a single season, only about 6% of the difference between batters under pressure is skill. The rest is luck. A batter needs about "
-     "800 pressure balls before skill is half of what you see. That's why I used all five seasons, and why my batting list did not hold up "
+     "800 pressure balls before skill and luck count equally in his numbers. That's why I used all five seasons, and why my batting list did not hold up "
      "when I tested it on 2026 alone.", "bat")}
 {row("8 / 10", "names stay", "If I change my choices",
      "I changed one choice at a time (the pressure definition, the cut-off, the rating method, the data used). Usually 8 of the 10 names "
      "stayed. The bowling list depends more on using T20Is too: on IPL matches alone, only 4 of the 10 bowlers would stay.", "scale")}
 </div>
 <div class="box"><h4>Where I am less sure</h4><ul class="cols2">
- <li>Batters are much harder to judge than bowlers</li><li>First-innings pressure is measured less sharply</li>
+ <li>Batters are much harder to judge than bowlers</li><li>My pressure score is less accurate in the first innings</li>
  <li>No fielding, dropped catches, pitch or weather in the data</li><li>Arya, Carse and Overton have fewer balls</li>
  <li>I looked at 2026 more than once while building, so it is not a perfectly clean test</li></ul></div>
 <div class="gh">{icon('code')}<div><h4>Want to check my work?</h4><p>All the code, the settings and a technical report (including why the simple
