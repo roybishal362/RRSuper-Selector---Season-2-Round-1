@@ -394,8 +394,7 @@ winning before each ball. Watch how far single balls move it: that movement is w
  a normal game once, and a dead rubber 0.75 times.</p></div>
 </div>
 <div class="formula">Pressure = impact × how big the match is</div>
-<p class="note"><b>To give you a feel:</b> in the first over of a chase, one ball moves the chance of winning by only about 1.5%. In the
-last over of a close chase, an average ball moves it by about 24% (say from 50% to 74%), and 1 ball in 10 moves it by 43% or more.</p>""",
+<p class="note"><b>To give you a feel:</b> in the first over of a chase, one ball can move the chance of winning by only about 1.5%. In the last over of a close chase, one ball can move it by about 24% on average, and the biggest balls by more than 40%. In the 2023 final above, Jadeja's last ball moved Chennai's chance from 21% to 100%.</p>""",
                  0, 'What is <span class="pk">pressure?</span>'))
 
 # 04 pressure: how it was chosen
