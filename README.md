@@ -128,7 +128,7 @@ Every ball gets a pressure score in three steps:
 <sub>Where pressure is highest, in each innings. Each square is one situation, such as "over 17, 4 wickets down". Darker pink means more pressure, on the same scale for both. Batting first, pressure is lighter and spread out; chasing, it is darker wherever the chase can still go either way.</sub>
 </div>
 
-**Why do 9 in 10 pressure balls come in chases?** In a chase both teams know the target, so every run and every wicket changes the result directly. Batting first, nobody knows yet what a winning score is. This is not a quirk of my model: in every league I checked, 80% to 94% of pressure balls came in chases. First-innings balls still count, because every ball counts in the rating and a higher-pressure ball just counts more. Overall, first-innings balls make up about 41% of the ratings.
+**Why do 9 in 10 pressure balls come in chases?** In a chase both teams know the target, so every run and every wicket changes the result directly. Batting first, nobody knows yet what a winning score is. This is not a quirk of my model. I checked 3,993 other T20 matches: T20 internationals including 3 World Cups, franchise leagues like the Big Bash, PSL and SA20, and India's Syed Mushtaq Ali Trophy (full list under [Does it hold up?](#does-it-hold-up)). In every one of them, 80% to 92% of pressure balls came in chases. First-innings balls still count, because every ball counts in the rating and a higher-pressure ball just counts more. Overall, first-innings balls make up about 41% of the ratings.
 
 ## How it works
 

@@ -224,7 +224,7 @@ CH_BAT = dumbbell(bat10, "SR_pressure", "SR_expected_pressure", "Strike rate on 
 CH_BOWL = dumbbell(bowl10, "econ_pressure", "econ_expected_pressure", "Economy on pressure balls (lower is better)", True,
                    lambda g: (f"{g:.1f} saved" if g >= 0.05 else "level"), "runs saved per over", "top10_bowlers")
 # both innings, side by side, on the same colour scale
-fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.0), sharey=True, gridspec_kw={"wspace": 0.06})
+fig, axes = plt.subplots(1, 2, figsize=(7.0, 1.8), sharey=True, gridspec_kw={"wspace": 0.06})
 for ax, tbl, ttl in ((axes[0], "pressure_heatmap_first", "1st innings: batting first"), (axes[1], "pressure_heatmap_chase", "2nd innings: chasing")):
     H = T(tbl).set_index("over_no")
     H = H[[c for c in H.columns if c in [str(i_) for i_ in range(0, 8)]]]
@@ -447,14 +447,15 @@ S.append(slide(f"""
 <div class="fair tight dense">
 {row("9 in 10", "pressure balls<br>come in chases", "Why chases?",
      "In a chase both teams know the target, so every run and wicket changes the result directly. Batting first, nobody knows yet what a "
-     "winning score is, so one ball changes less. Real results agree: in the middle overs, a four instead of a dot changed the chasing team's "
+     "winning score is. Real results agree: in the middle overs, a four instead of a dot changed the chasing team's "
      "win rate by 7%, and the first-innings team's by only 3.4%.")}
 {row("41%", "of the rating<br>is first innings", "The first innings still counts",
      "I don't throw any ball away. Every ball counts in the rating, and a ball with more pressure counts more. So first-innings balls are "
      "not ignored: they make up about 41% of the ratings overall. So a batter who rescues his team from 30 for 3 in the first "
      "innings gets credit for it, and so does the bowler who took those 3 wickets.")}
-{row("80–94%", "in every<br>league", "It's how T20 works",
-     "I checked 3,993 other matches from leagues like the Big Bash, PSL and SA20. In every league, 80% to 94% of pressure balls came in chases. "
+{row("80–92%", "in chases, in every<br>competition", "It's how T20 works",
+     "I checked 3,993 other T20 matches: T20 internationals including 3 World Cups, franchise leagues like the Big Bash, PSL and SA20, "
+     "and India's Syed Mushtaq Ali Trophy (full list on page 14). In every one of them, 80% to 92% of pressure balls came in chases. "
      "So this is how T20 cricket is, not a quirk of my model.")}
 </div>
 <h3>Pressure from both ends</h3>
