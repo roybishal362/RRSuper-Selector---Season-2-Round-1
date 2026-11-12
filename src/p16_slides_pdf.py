@@ -377,8 +377,9 @@ internationals from 2022 to 2026. Under each name: <b class="pk">his number on p
 S.append(slide(f"""
 <div class="defbox"><h3>Pressure, in plain words</h3>
 <p>A ball is under pressure when its result can change who wins the match. A dot ball in the first over hardly matters. A dot
-ball when 12 are needed off the last over can decide the game. I give every ball a pressure score, and the 20% of balls with the
-highest score are my <b>pressure balls</b>. The players in this report are the ones who did best on those balls.</p></div>
+ball when 12 are needed off the last over can decide the game. I give all 200,961 balls a pressure score, line them up from
+highest to lowest, and the top 20% (about 40,000 balls) are my <b>pressure balls</b>. They can come at any point of a match: the tight
+2023 final had 115 of them, while 131 one-sided matches had none.</p></div>
 <div class="chartcard"><h4>A real example: the 2023 IPL final</h4>
 <p class="cap">Rain cut the match to 15 overs. Chennai needed 13 off the last over against Gujarat. The line is Chennai's chance of
 winning before each ball. Watch how far single balls move it: that movement is what I call pressure.</p>
@@ -619,7 +620,7 @@ S.append(slide(f"""
 <p class="sm"><b>Batters.</b> {nxt_b}</p><p class="sm"><b>Bowlers.</b> {nxt_w}</p>
 <h3>C · Words used</h3>
 <div class="gloss">
-<div><b>Pressure ball</b><span>One of the 20% of balls whose result can change the match the most (impact × how big the match is).</span></div>
+<div><b>Pressure ball</b><span>One of the top 20% of all 200,961 balls when they are sorted by pressure score (impact × how big the match is).</span></div>
 <div><b>Impact</b><span>How much one ball can change a team's chance of winning, on average.</span></div>
 <div><b>Average player, same situations</b><span>What a typical player does in the same over, score, wickets, target, ground, season and competition. For bowlers, the same type (pace or spin).</span></div>
 <div><b>Pulled towards average</b><span>A record built on few balls gets less trust, so it is moved closer to average (shrinkage).</span></div>

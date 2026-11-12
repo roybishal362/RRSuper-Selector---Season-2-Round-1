@@ -111,7 +111,7 @@ Every ball gets a pressure score in three steps:
 | **2. How much can this ball change it?** | I check what the chance would become after a dot, a single, a four, a six or a wicket. The bigger the possible swing, the more the ball matters. I call this the ball's **impact**. | First over of a chase: about 1.5%. Last over of a close chase: about 24% on an average ball. |
 | **3. How big is the match?** | Finals and knockouts count more than normal games. | Knockout ×1.5 · must-win ×1.25 · normal ×1 · dead rubber ×0.75 |
 
-**Pressure = impact × how big the match is.** The top 20% of balls are the **pressure balls**.
+**Pressure = impact × how big the match is.** I give all 200,961 balls this score and sort them from highest to lowest. The top 20% (about 40,000 balls) are the **pressure balls**. They are not the first balls of a match; they can come at any point. The tight 2023 final had 115 of them, while 131 one-sided matches had none.
 
 **Why this definition?** I didn't pick it on gut feeling.
 - I listed 38 possible signs of pressure, such as a required rate above 10, three dots in a row, a new batter or a knockout game.
