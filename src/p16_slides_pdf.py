@@ -23,6 +23,7 @@ LOGO_W = URL(os.path.join(A, "rr_logo_white.png"))
 IPL = json.load(open(os.path.join(A, "players", "ipl", "ipl_photos.json")))
 WIKI = json.load(open(os.path.join(A, "players", "credits.json"), encoding="utf-8"))
 AUTHOR = "Bishal Roy"
+EMAIL = "roybishal9989@gmail.com"
 GITHUB = "github.com/roybishal362/RRSuper-Selector---Season-2-Round-1"
 SECTIONS = ["Pressure definition", "Performance measurement", "Fair comparisons", "Evidence for the top 10", "Reliability and limitations"]
 
@@ -34,7 +35,14 @@ plt.rcParams.update({"font.family": "Segoe UI", "font.size": 9, "svg.fonttype": 
 esc = html.escape
 
 
-def svg(fig):
+FIGS = os.path.join(ROOT, "docs", "figures")
+
+
+def svg(fig, name=None):
+    """inline SVG for the deck; with a name, also a PNG copy for the GitHub README (charts only, no photos or logos)"""
+    if name:
+        os.makedirs(FIGS, exist_ok=True)
+        fig.savefig(os.path.join(FIGS, name + ".png"), dpi=200, bbox_inches="tight", facecolor="white")
     b = io.StringIO()
     fig.savefig(b, format="svg", bbox_inches="tight", transparent=True)
     plt.close(fig)
@@ -175,7 +183,7 @@ c_ = load("ctx_preds", columns=["ball_uid", "wp_now", "wp_next"])
 fo = f_[(f_.match_id == 21586) & (f_.innings == 2) & (f_.over_no == 15)].merge(c_, on="ball_uid")
 wp = list(fo.wp_now * 100) + [100 * fo.wp_next.iloc[-1]]
 runs = list(fo.team_runs)
-fig, ax = plt.subplots(figsize=(7.0, 3.3))
+fig, ax = plt.subplots(figsize=(7.0, 2.75))
 x = np.arange(len(wp))
 ax.fill_between(x[:5], wp[:5], color="#dfe6f2", alpha=0.6, lw=0)
 ax.fill_between(x[4:], wp[4:], color="#fbd6ea", alpha=0.7, lw=0)
@@ -190,10 +198,10 @@ ax.set_ylabel("Chennai's chance of winning", fontsize=8)
 ax.spines["left"].set_visible(False); ax.yaxis.grid(True, color=RULE, lw=0.6); ax.set_axisbelow(True)
 ax.text(1.6, 92, "Mohit Sharma: four balls,\nchance falls to 6.5%", fontsize=8.2, color=NAVY, ha="center")
 ax.text(4.72, 62, "Jadeja: six,\nthen four", fontsize=8.6, color=PINK, ha="center", fontweight="bold")
-CH_FINAL = svg(fig)
+CH_FINAL = svg(fig, "final_over_2023")
 
 
-def dumbbell(df, xcol, ecol, xlabel, lower_better, fmt, unit):
+def dumbbell(df, xcol, ecol, xlabel, lower_better, fmt, unit, name=None):
     d = df.iloc[::-1]
     fig, ax = plt.subplots(figsize=(6.9, 3.35))
     y = np.arange(len(d))
@@ -209,15 +217,15 @@ def dumbbell(df, xcol, ecol, xlabel, lower_better, fmt, unit):
     ax.set_xlim(right=xmax * 1.12); ax.set_xlabel(xlabel, fontsize=8.5)
     ax.spines["left"].set_visible(False); ax.xaxis.grid(True, color=RULE, lw=0.6); ax.set_axisbelow(True)
     ax.text(xmax * 1.12, len(d) - 0.35, unit, ha="right", va="bottom", fontsize=7.6, color=MUTED)
-    return svg(fig)
+    return svg(fig, name)
 
 
-CH_BAT = dumbbell(bat10, "SR_pressure", "SR_expected_pressure", "Strike rate on pressure balls", False, lambda g: f"+{g:.0f}", "above typical")
+CH_BAT = dumbbell(bat10, "SR_pressure", "SR_expected_pressure", "Strike rate on pressure balls", False, lambda g: f"+{g:.0f}", "above average", "top10_batters")
 CH_BOWL = dumbbell(bowl10, "econ_pressure", "econ_expected_pressure", "Economy on pressure balls (lower is better)", True,
-                   lambda g: (f"{g:.1f} saved" if g >= 0.05 else "level"), "runs saved per over")
+                   lambda g: (f"{g:.1f} saved" if g >= 0.05 else "level"), "runs saved per over", "top10_bowlers")
 H = T("pressure_heatmap_chase").set_index("over_no")
 H = H[[c for c in H.columns if c in [str(i) for i in range(0, 8)]]]
-fig, ax = plt.subplots(figsize=(6.9, 2.95))
+fig, ax = plt.subplots(figsize=(6.9, 2.15))
 im = ax.imshow(H.T.values * 100, aspect="auto", cmap=SEQ, vmin=0, vmax=100, origin="lower")
 ax.set_xticks(range(len(H.index))); ax.set_xticklabels(H.index.astype(int), fontsize=7.8)
 ax.set_yticks(range(H.shape[1])); ax.set_yticklabels(H.columns, fontsize=7.8)
@@ -227,12 +235,12 @@ for s_ in ax.spines.values():
 ax.tick_params(length=0)
 cb = fig.colorbar(im, ax=ax, fraction=0.025, pad=0.015); cb.outline.set_visible(False)
 cb.set_label("Pressure (0–100)", fontsize=7.8, color=INK2); cb.ax.tick_params(labelsize=7, length=0)
-CH_HEAT = svg(fig)
+CH_HEAT = svg(fig, "pressure_map_chase")
 ev = EV[EV.method.str.startswith("CHOSEN")]
 grp = ["all public matches", "T20 World Cups", "franchise leagues", "full-member T20Is (incl. World Cups)"]
 lab = {"all public matches": "All 3,993 matches", "T20 World Cups": "T20 World Cups", "franchise leagues": "Franchise leagues",
        "full-member T20Is (incl. World Cups)": "T20Is, top nations"}
-fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.15), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(6.9, 1.85), sharey=True)
 for ax, side, title in ((axes[0], "bat", "Top 10 batters: extra runs"), (axes[1], "bowl", "Top 10 bowlers: runs saved")):
     e = ev[ev.side == side].set_index("group").reindex(grp)
     vals = e.top10_runs_per_100_pressure_balls.values
@@ -245,7 +253,7 @@ for ax, side, title in ((axes[0], "bat", "Top 10 batters: extra runs"), (axes[1]
     ax.set_xlim(0, max(vals) * 1.35); ax.set_xticks([])
     for s_ in ("left", "bottom"):
         ax.spines[s_].set_visible(False)
-CH_PUBLIC = svg(fig)
+CH_PUBLIC = svg(fig, "outside_matches_test")
 
 # ----------------------------------------------------------------------------- icons (simple line drawings)
 IC = {
@@ -332,6 +340,14 @@ def trace_svg(vals, w=170, h=46):
 
 
 S = []
+
+
+def row(big, small, head, text, ic=None, cls=""):
+    """one idea per row: a big number or label on the left, a plain explanation on the right (the 'like with like' look)"""
+    return (f'<div class="fr {cls}"><div class="frn"><b>{big}</b><span>{small}</span></div><div>{icon(ic) if ic else ""}'
+            f'<h4>{head}</h4><p>{text}</p></div></div>')
+
+
 # 01 cover
 S.append(slide(f"""
 <img class="cv-wm" src="{LOGO_W}" alt="">
@@ -341,94 +357,102 @@ S.append(slide(f"""
 and international cricket, and how each of them could strengthen Rajasthan Royals.</p></div>
 <div class="cv-tr">{trace_svg(wp)}<div class="cv-trc">Chennai's chance of winning before each ball of the last over of the 2023 IPL final.
 This report is about balls like these.</div></div>
-<div class="cv-bot"><div><div class="cv-k">Prepared by</div><div class="cv-name">{AUTHOR}</div><div class="cv-d">Methodology report and rankings · November 2026</div></div>
+<div class="cv-bot"><div><div class="cv-k">Prepared by</div><div class="cv-name">{AUTHOR}</div><div class="cv-d">{EMAIL}</div></div>
 <img class="cv-logo" src="{LOGO_W}" alt="Rajasthan Royals"></div>""", cls="cover"))
 
 # 02 the answer
 S.append(slide(f"""
-<p class="lede">The ten batters and ten bowlers who did best when one ball could decide the match, across the IPL and
-T20 internationals, 2022 to 2026. The five parts of this report follow the five items in the brief, shown along the top of every page.</p>
-<div class="grid-h"><span class="pill">Batters</span><span class="ght">Strike rate under pressure <em>v a typical batter in the same situations</em></span></div>
+<p class="lede">These are the 10 batters and 10 bowlers who did best when the match was on the line, in the IPL and T20
+internationals from 2022 to 2026. Under each name: <b class="pk">his number on pressure balls</b> v <span class="them">what an average player managed in the same situations</span>.</p>
+<div class="grid-h"><span class="pill">Batters</span><span class="ght">Strike rate under pressure <em>v an average batter in the same situations</em></span></div>
 <div class="minis">{''.join(mini(r, 'bat') for _, r in bat10.iterrows())}</div>
-<div class="grid-h"><span class="pill">Bowlers</span><span class="ght">Economy under pressure <em>v a typical bowler of the same type, same situations</em></span></div>
+<div class="grid-h"><span class="pill">Bowlers</span><span class="ght">Economy under pressure <em>v an average bowler of the same type (lower is better)</em></span></div>
 <div class="minis">{''.join(mini(r, 'bowl') for _, r in bowl10.iterrows())}</div>
 <div class="stats4">
- <div><b>200,961</b><span>balls analysed</span></div><div><b>867</b><span>matches</span></div>
- <div><b>5</b><span>seasons, 2022–26</span></div><div><b>3,993</b><span>outside matches, used only to test</span></div>
+ <div><b>200,961</b><span>balls studied, ball by ball</span></div><div><b>867</b><span>IPL and T20I matches</span></div>
+ <div><b>5</b><span>seasons, 2022 to 2026, all counted equally</span></div><div><b>3,993</b><span>extra matches (World Cups, leagues) used only to test my picks</span></div>
 </div>""", None, 'My <span class="pk">top 10s</span>', kicker="The answer"))
 
-# 03 pressure: the idea
+# 03 pressure: what it is
 S.append(slide(f"""
-<p class="lede">2023 IPL final, cut to 15 overs by rain. Chennai need 13 off the last over against Gujarat. In six balls the
-title changes hands twice.</p>
-<figure class="chart">{CH_FINAL}</figure>
-<div class="def">
- <div class="def-l"><h3>Turning that into a number</h3>
- <p>Before every ball, a model estimates each team's chance of winning. It then asks how far the next ball could move that chance
- (a dot, a single, a four, a six or a wicket) and averages those moves by how likely each one is. I call the result the ball's
- <b>impact</b>.</p></div>
- <div class="def-r">
-  <div class="kv"><b>1.5</b><span>points of win chance: the impact of a ball in the first over of a chase</span></div>
-  <div class="kv"><b>24</b><span>points: an average ball in the last over of a close chase</span></div>
-  <div class="kv"><b>43+</b><span>points: one ball in ten there. Enough to turn 50% into 93%</span></div>
- </div>
+<div class="defbox"><h3>Pressure, in plain words</h3>
+<p>A ball is under pressure when its result can change who wins the match. A dot ball in the first over hardly matters. A dot
+ball when 12 are needed off the last over can decide the game. I give every ball a pressure score, and the 20% of balls with the
+highest score are my <b>pressure balls</b>. The players in this report are the ones who did best on those balls.</p></div>
+<div class="chartcard"><h4>A real example: the 2023 IPL final</h4>
+<p class="cap">Rain cut the match to 15 overs. Chennai needed 13 off the last over against Gujarat. The line is Chennai's chance of
+winning before each ball. Watch how far single balls move it: that movement is what I call pressure.</p>
+<figure class="chart">{CH_FINAL}</figure></div>
+<h3>How I give every ball a pressure score</h3>
+<div class="st3">
+ <div><span class="fn">1</span>{icon('target')}<h4>Chance of winning</h4><p>Before every ball, a machine-learning model works out each team's
+ chance of winning from the score, balls left, wickets and target. Like the win predictor on TV.</p></div>
+ <div><span class="fn">2</span>{icon('ball')}<h4>How much can this ball change it?</h4><p>I check the chance after a dot, a single, a four, a
+ six or a wicket. The bigger the possible swing, the more the ball matters. I call this the ball's <b>impact</b>.</p></div>
+ <div><span class="fn">3</span>{icon('check')}<h4>How big is the match?</h4><p>A final or knockout counts 1.5 times, a must-win game 1.25 times,
+ a normal game once, and a dead rubber 0.75 times.</p></div>
 </div>
-<div class="chips"><span><b>1.5×</b> final or knockout</span><span><b>1.25×</b> must-win game</span><span><b>1×</b> normal game</span><span><b>0.75×</b> dead rubber</span></div>
-<div class="formula">Pressure = impact × how much the match matters</div>
-<p class="note">The top fifth of all balls on this score are <b>pressure balls</b>. Every ball still counts in the ratings, and the more
-pressure, the more it counts. <span class="tl">Technical: impact = Σ P(outcome) × |change in win chance|. Win chance comes from a logistic
-regression that beat ten alternatives (gradient boosting, random forests, stacking and others) on matches it had not seen.</span></p>""",
-                 0, 'One ball can <span class="pk">decide a final</span>'))
+<div class="formula">Pressure = impact × how big the match is</div>
+<p class="note"><b>To give you a feel:</b> in the first over of a chase, one ball moves the chance of winning by only about 1.5%. In the
+last over of a close chase, an average ball moves it by about 24% (say from 50% to 74%), and 1 ball in 10 moves it by 43% or more.</p>""",
+                 0, 'What is <span class="pk">pressure?</span>'))
 
-# 04 pressure: how the formula was chosen
+# 04 pressure: how it was chosen
 D = DEFS.set_index("definition")
-DN = [("C-A leverage", "Impact alone", True), ("C-C stakes x strain", "Impact × how hard the situation is", False),
-      ("C-B leverage x big match", "Impact × knockout and must-win flags", False),
-      ("C-E GMM regimes", "Groups of similar situations (clustering)", False),
+DN = [("C-A leverage", "Impact (how much a ball can change the result)", True),
+      ("C-C stakes x strain", "Impact × how hard the situation is", False),
+      ("C-B leverage x big match", "Impact × knockout and must-win games", False),
+      ("C-E GMM regimes", "Machine-learning groups of similar situations", False),
       ("C-G simple rules", "Simple rules: last 5 overs, rate 9+, close game", False),
-      ("C-F Bhattacharjee-Lemmer", "Published index: Bhattacharjee & Lemmer", False),
-      ("C-F Thomson zone", "Published 'clutch zone': Thomson et al.", False),
-      ("C-D PCA factor", "One statistical factor from many signals", False)]
+      ("C-F Bhattacharjee-Lemmer", "A published pressure index (Bhattacharjee & Lemmer)", False),
+      ("C-F Thomson zone", "A published 'clutch zone' (Thomson and others)", False),
+      ("C-D PCA factor", "One combined score from many signals (PCA)", False)]
 drows = "".join(f'<tr class="{"win" if w else ""}"><td>{lbl}</td><td><div class="sbar"><span style="width:{100 * D.loc[k, "score"]:.0f}%"></span></div></td>'
                 f'<td class="n">{100 * D.loc[k, "score"]:.0f}</td></tr>' for k, lbl, w in DN if k in D.index)
 S.append(slide(f"""
-<p class="lede">I didn't start with the formula. I started with every idea of pressure I could think of, and let the data
-choose.</p>
+<p class="lede">Pressure can be measured in many ways: the required rate, wickets lost, dot balls in a row, a big match. I didn't want to
+pick one on gut feeling, so I tested them all and let the data decide.</p>
 <div class="funnel">
- <div class="fs"><b>38</b><span>ideas</span><p>From the scoreboard, the last few overs, the bowler's spell, the match and the player</p></div>
+ <div class="fs"><b>38</b><span>ideas</span><p>Signs of pressure, like a rate above 10, three dots in a row, a new batter or a knockout</p></div>
  <div class="arrow">→</div>
- <div class="fs"><b>3</b><span>tests each</span><p>Does it change how players perform? Does it decide matches? Does it hold every season, in IPL and T20I?</p></div>
+ <div class="fs"><b>3</b><span>tests for each</span><p>Do players perform differently? Do these balls decide matches? Is it true every season?</p></div>
  <div class="arrow">→</div>
- <div class="fs"><b>8</b><span>full definitions</span><p>Built from the ideas that passed, then scored against each other</p></div>
+ <div class="fs"><b>8</b><span>full definitions</span><p>Built from the ideas that passed, including two from published research</p></div>
  <div class="arrow">→</div>
- <div class="fs win"><b>1</b><span>chosen</span><p>Impact, multiplied by how much the match matters</p></div>
+ <div class="fs win"><b>1</b><span>winner</span><p>Impact, with how big the match is added on top</p></div>
 </div>
-<div class="proof"><div class="pt">Pressure balls really are different</div>
-<div><b>2.2×</b><span>The win chance moves 2.2 times as much on a pressure ball as on an average ball</span></div>
-<div><b>+8%</b><span>Batters get out 8% more often on pressure balls than on other balls at the same stage of an innings</span></div></div>
-<h3>The eight definitions, scored</h3>
-<table class="defs"><thead><tr><th>Definition</th><th>Score out of 100</th><th class="n"></th></tr></thead><tbody>{drows}</tbody></table>
-<p class="cap">The score is half how much more the win chance moves on a definition's pressure balls, and half how much more often batters get out on them. Impact alone scored highest. Adding match importance cost almost nothing (99 against 100), and a final should count for more
-than a dead rubber, so I kept it.</p>
-<div class="two">
- <div class="box"><h4>Where to draw the line</h4><p>I call the top 20% of balls pressure balls. Move that line anywhere from 10% to 30%
- and all ten batters stay, along with six to ten of the bowlers.</p></div>
- <div class="box"><h4>What about collapses and dot-ball runs?</h4><p>They make batting harder, but they don't make the next ball more likely
- to decide the match, so they don't add to pressure. They are allowed for in the comparison instead (next part).</p></div>
-</div>""", 0, 'I tested <span class="pk">38 ideas</span> before choosing one'))
+<h3>Proof that pressure balls really are different</h3>
+<div class="fair tight">
+{row("2.2×", "more movement", "The result really swings more",
+     "On my pressure balls, the chance of winning moves 2.2 times as much as on an average ball. These are the balls that decide matches.")}
+{row("+8%", "more wickets", "Batters get out more often",
+     "On pressure balls, batters get out 8% more often than on other balls at the same stage of an innings (same innings, same overs, same wickets down).")}
+</div>
+<h3>The 8 definitions, scored out of 100</h3>
+<p class="cap">Each definition got a score for how much the result really swings on its pressure balls and how much more often batters
+get out on them. Higher is better.</p>
+<table class="defs"><tbody>{drows}</tbody></table>
+<p class="cap">Impact alone scored 100. Adding "how big the match is" scored 99, almost the same, so I kept it: a final should count more
+than a dead rubber. I also tried other cut-offs from the top 10% to the top 30% of balls: all 10 batters and 6 to 10 of the bowlers stayed.</p>""",
+                 0, 'How I <span class="pk">chose</span> this definition'))
 
-# 05 pressure: where it falls, from both ends
+# 05 pressure: where it happens
 S.append(slide(f"""
-<figure class="chart">{CH_HEAT}</figure>
-<p class="cap">Average pressure on a ball in a chase. It is highest wherever the game is still in the balance, and drops when a team is
-cruising or has collapsed.</p>
-<div class="facts3">
- <div><b>9 in 10</b><p>pressure balls come in chases. With a target in sight, each ball matters more: in the middle overs a four instead of
- a dot is worth 7 points of win chance to a chasing side, and 3.4 to the side batting first.</p></div>
- <div><b>41%</b><p>of the weight in the ratings still comes from first-innings balls, because every ball counts in proportion to its
- pressure. Rebuilding at 30 for 3 counts, for the batter and the bowler.</p></div>
- <div><b>80–94%</b><p>of pressure balls fall in chases in every competition in the 3,993 outside matches. It is how T20 works, not a quirk
- of the model.</p></div>
+<div class="chartcard"><h4>Where pressure is highest in a chase</h4>
+<p class="cap">Each square is one situation, for example "over 17, 4 wickets down". The darker the pink, the more pressure. It is highest
+along the band where the chase can still go either way, and fades when the chasing team has collapsed (top left) or is cruising (bottom right).</p>
+<figure class="chart">{CH_HEAT}</figure></div>
+<div class="fair tight dense">
+{row("9 in 10", "pressure balls<br>come in chases", "Why chases?",
+     "In a chase both teams know the target, so every run and wicket changes the result directly. Batting first, nobody knows yet what a "
+     "winning score is, so one ball changes less. Real results agree: in the middle overs, a four instead of a dot changed the chasing team's "
+     "win rate by 7%, and the first-innings team's by only 3.4%.")}
+{row("41%", "of the rating<br>is first innings", "The first innings still counts",
+     "I don't throw any ball away. Every ball counts, and a ball with more pressure counts more. Added up, 41% of what goes into the ratings "
+     "comes from first-innings balls, so rebuilding at 30 for 3 still matters, for the batter and the bowler.")}
+{row("80–94%", "in every<br>league", "It's how T20 works",
+     "I checked 3,993 other matches from leagues like the Big Bash, PSL and SA20. In every league, 80% to 94% of pressure balls came in chases. "
+     "So this is how T20 cricket is, not a quirk of my model.")}
 </div>
 <h3>Pressure from both ends</h3>
 <table class="jobs"><thead><tr><th>Situation</th><th>What the batter must do</th><th>What the bowler must do</th></tr></thead><tbody>
@@ -436,126 +460,152 @@ cruising or has collapsed.</p>
 <tr><td>Chasing, middle overs, rate climbing</td><td>Score off almost every ball without losing wickets</td><td>Build dots and force a risky shot</td></tr>
 <tr><td>Top order gone early</td><td>Rebuild without stalling</td><td>Strike again before the new batters settle</td></tr>
 <tr><td>Final or must-win game</td><td colspan="2">The same jobs, but every ball counts 1.5 or 1.25 times as much</td></tr>
-</tbody></table>""", 0, 'Where <span class="pk">pressure falls</span>'))
+</tbody></table>""", 0, 'Where pressure <span class="pk">happens</span>'))
 
-# 06 performance measurement
+# 06 the method, step by step (machine learning named in plain words)
+ML = lambda t: f'<span class="mlt">{t}</span>'
 S.append(slide(f"""
-<p class="lede">On every ball, one question: did he do better than a typical player would have, in exactly that situation?</p>
+<p class="lede">Here is the whole system from start to finish. Machine learning sets the yardstick (what is normal in each situation).
+It never picks a player directly: every player is judged on whether he beat that yardstick on the balls that mattered.</p>
+<div class="fair steps">
+{row("1", "clean", "Rebuild every ball",
+     "I fixed how extras are recorded and rebuilt the score, wickets, target and balls left before each of the 200,961 balls. "
+     + ML("Data cleaning and checks in Python"), "filter")}
+{row("2", "predict", "Predict who wins, before every ball",
+     "A model gives each team's chance of winning. I tested 11 machine-learning models for this job. The simplest, logistic regression, "
+     "predicted new matches best; complex ones like XGBoost and Random Forest memorised old matches instead. "
+     + ML("Logistic regression, beat 10 other models"), "target")}
+{row("3", "pressure", "Score the pressure on every ball",
+     "Impact × how big the match is. The top 20% are the pressure balls. " + ML("Chosen from 8 definitions by testing"), "scale")}
+{row("4", "average", "Learn what an average player does",
+     "A second model learns, from all 200,961 balls, what an average player does in each situation: how often a dot, a four, a six or a "
+     "wicket. It never sees player names. " + ML("LightGBM (gradient boosting), 41 inputs"), "users")}
+{row("5", "rate", "Rate every player",
+     "On every ball: the player's result minus the average player's. Pressure balls count most. A player with few balls is pulled "
+     "towards average, so one lucky game can't make a star. " + ML("Empirical Bayes shrinkage"), "bat")}
+{row("6", "test", "Choose the settings and test them",
+     "Settings were chosen by hiding matches and checking the picks on them, 52 times. The ranking was rebuilt 1,000 times on reshuffled "
+     "matches, and the final picks were tested on 3,993 matches the model never saw. " + ML("Cross-validation, bootstrap, outside test"), "check")}
+</div>""", 1, 'My method in <span class="pk">6 steps</span>'))
+
+# 07 performance measurement
+S.append(slide(f"""
+<p class="lede">For every ball, I ask one question: did this player do better or worse than an average player would have, in exactly
+the same situation?</p>
 <div class="flow">
- <div class="fl"><span class="fn">1</span><b>What usually happens</b><p>A model trained on 200,000 balls gives the typical outcome for that over, score,
- wickets, target, how long the batter has been in, ground, season and competition.</p></div>
+ <div class="fl"><span class="fn">1</span><b>What usually happens</b><p>The model's answer for that over, score, wickets, target, ground,
+ season and competition, and how long the batter has been in.</p></div>
  <div class="fl"><span class="fn">2</span><b>What actually happened</b><p>The runs, the dot, the boundary or the wicket on this ball.</p></div>
- <div class="fl hi"><span class="fn">3</span><b>The difference</b><p>His value on that ball. Beat the typical outcome and he gains; fall short and he loses.</p></div>
+ <div class="fl hi"><span class="fn">3</span><b>The difference</b><p>His score for that ball. Better than usual and he gains; worse and he loses.</p></div>
 </div>
-<div class="two">
- <div class="box">{icon('bat')}<h4>Batters</h4><p>Runs count for him and getting out counts against him. A wicket costs more when the team can
- least afford it: out at 30 for 3 in the eighth over costs far more than out off the last ball.</p></div>
- <div class="box">{icon('ball')}<h4>Bowlers</h4><p>Runs saved, dot balls and the wickets he took himself (run-outs don't count). Wides and no-balls
- count against him. Pace is compared with pace, spin with spin.</p></div>
+<div class="example"><b>Example:</b> on pressure balls, Abhishek Sharma scored at a strike rate of 184. An average batter in the same
+situations would have scored at 156. That gap, ball by ball, minus what his dismissals cost the team, is his rating.</div>
+<div class="fair tight">
+{row("+ / −", "runs add,<br>getting out costs", "What counts for a batter",
+     "Runs count for him and getting out counts against him. A wicket costs more when the team can least afford it: out at 30 for 3 in the "
+     "eighth over costs far more than out off the last ball.", "bat")}
+{row("+ / −", "runs saved and<br>wickets add", "What counts for a bowler",
+     "Runs saved, dot balls and the wickets he took himself (run-outs don't count). Wides and no-balls count against him. Pace bowlers are "
+     "compared with pace bowlers, spinners with spinners.", "ball")}
+{row("Luck?", "rising above your<br>own level", "Why not compare a player with his own normal game?",
+     "The brief talks about usual levels, so I tested this first: pressure performance minus normal performance, for every player. Then I "
+     "split each player's matches into two halves. Players who rose under pressure in one half did not do it again in the other half. Even "
+     "fake, randomly chosen 'pressure balls' showed the same pattern. It looked like luck, so I rank players on how good they are under "
+     "pressure compared with everyone else in the same moments. That did repeat.", "scale")}
 </div>
-<div class="example"><b>Example:</b> Abhishek Sharma scored at a strike rate of 184 on pressure balls. A typical batter in the same situations
-would have scored at 156. That gap, ball by ball, minus the cost of his dismissals, is his rating.</div>
-<div class="callout"><h3>Why not compare a player with his own usual level?</h3>
-<p>The brief asks about performance under pressure compared with usual levels, so I measured that first: each player's pressure
-record minus his normal record. Then I checked whether it repeats. It doesn't. A player who beat his own normal in one half of his
-matches was no more likely to do it in the other half, and shuffling the "pressure" label at random 200 times made just as much
-difference. Rising above your own level looks like luck. So the ranking asks a question that does repeat: in the same pressure
-moments, who does better than a typical player?</p></div>
-<div class="rule wide"><div class="wts"><div><span style="width:95%"></span><em>top pressure</em></div><div><span style="width:25%"></span><em>ordinary ball</em></div><div><span style="width:4%"></span><em>game decided</em></div></div>
-<p><b>Adding it up: pressure balls count most.</b> A top-pressure ball counts almost in full, an ordinary ball about a quarter, and a ball in
-a game already decided almost nothing. Small samples are pulled towards average (next part).
-<span class="tl">Technical: typical outcomes from LightGBM over 41 facts about the situation, never player names. Rating = pressure-weighted
-value per ball × n / (n + k), empirical Bayes shrinkage.</span></p></div>""",
+<div class="rule wide"><div class="wts"><div><span style="width:95%"></span><em>highest pressure</em></div><div><span style="width:25%"></span><em>ordinary ball</em></div><div><span style="width:4%"></span><em>match already decided</em></div></div>
+<p><b>Adding it up: pressure balls count most.</b> The highest-pressure balls count fully, an ordinary ball about a quarter, and a ball in a
+match that is already decided almost nothing. The total is the player's rating.</p></div>""",
                  1, 'How every ball <span class="pk">is scored</span>'))
 
-# 07 fair comparisons (the brief's four points, in its own words)
+# 08 fair comparisons
 S.append(slide(f"""
 <p class="lede">The brief lists four things a fair comparison has to handle. This is how I handled each one.</p>
 <div class="fair">
- <div class="fr"><div class="frn"><b>60</b><span>pressure balls<br>at least</span></div><div>{icon('scale')}<h4>Sample sizes</h4>
- <p>A record built on few balls is pulled towards the average, and the fewer the balls, the stronger the pull. Nobody with under 60
- pressure balls is ranked. Without that floor, a bowler with a single pressure ball came sixth.</p></div></div>
- <div class="fr"><div class="frn"><b>2025+</b><span>last match in<br>2025 or 2026</span></div><div>{icon('users')}<h4>Player eligibility</h4>
- <p>Every player in the data is rated, using all five seasons, each season counting the same. Because the target is the 2027 auction,
- the lists only include players who played in 2025 or 2026. That leaves out Dinesh Karthik, who retired in 2024 and would have been
- tenth among batters. Players left out still count in every comparison.</p></div></div>
- <div class="fr"><div class="frn"><b>9 → 3</b><span>spinners in the<br>bowling top 10</span></div><div>{icon('pin')}<h4>Different match contexts</h4>
- <p>The typical player is worked out for the same over, score, wickets, target, ground, season and stage of the tournament. IPL scoring
- rose about 16% from 2022 to 2026, and the yardstick rises with it. Bowlers are compared with their own type: before that rule,
- spin's cheaper economy put 9 spinners in the top 10. Now there are 3.</p></div></div>
- <div class="fr"><div class="frn"><b>4</b><span>competition<br>levels</span></div><div>{icon('globe')}<h4>IPL and T20I data</h4>
- <p>Both are used, because more pressure balls mean fairer judgements. Each level has its own typical player: the IPL, T20Is
- between the top nations, other T20Is and A-team games. A player is measured against what is normal where he played.</p></div></div>
+{row("60", "pressure balls<br>at least", "Sample sizes",
+     "A player with only a few pressure balls might just have been lucky. So the fewer balls he has, the more his rating is pulled towards "
+     "average, and nobody with fewer than 60 pressure balls is ranked. Without this rule, a bowler who had bowled a single pressure ball came sixth.", "scale")}
+{row("2025+", "last match in<br>2025 or 2026", "Player eligibility",
+     "Every player in the data was rated, using all five seasons, each season counting the same. RR are buying for the 2027 auction, so the "
+     "final lists only include players who played in 2025 or 2026. That left out Dinesh Karthik, who retired in 2024 and would have been "
+     "10th among batters. Players left out still count when working out the average player.", "users")}
+{row("9 → 3", "spinners in the<br>bowling top 10", "Different match contexts",
+     "The average player is worked out for the same over, score, wickets, target, ground, season and stage of the tournament, so nobody gains "
+     "just from a small ground or a high-scoring year (IPL scoring rose about 16% from 2022 to 2026). Bowlers are compared only with their own "
+     "type. Without that rule, 9 of my top 10 bowlers were spinners, because spin is naturally cheaper. Now there are 3.", "pin")}
+{row("4", "competition<br>levels", "IPL and T20I data",
+     "I used both, because more matches mean fairer judgements. But a run in the IPL and a run against a weaker T20I side are not the same, so "
+     "each level has its own average player: the IPL, T20Is between the top 12 nations, other T20Is, and A-team games.", "globe")}
 </div>""", 2, 'Comparing <span class="pk">like with like</span>'))
 
-# 08-11 picks
-READ = ("<b>Pink</b> is the player, <b>grey</b> a typical player in the same situations. <b>Stays top 10</b>: how often he stayed top ten "
-        "in 1,000 rebuilds of the ranking on reshuffled matches. <b>For RR</b>: his fit to RR's own pressure record, IPL 2025–26.")
+# 09-12 picks
+READ = ("<b>How to read a card.</b> The <b class='pk'>pink bar</b> is the player, the grey bar is an average player in the same situations. "
+        "<b>Stays top 10</b> shows how sure I am: I rebuilt the ranking 1,000 times on reshuffled matches, and this is how often he stayed "
+        "in the top 10. <b>For RR</b> shows where he would help, based on RR's own record under pressure in IPL 2025 and 2026.")
 for side, df, word in (("bat", bat10, "batters"), ("bowl", bowl10, "bowlers")):
     for part, sl in ((1, slice(0, 5)), (2, slice(5, 10))):
         lede = f'<p class="lede sm">{READ}</p>' if part == 1 else ""
         S.append(slide(lede + '<div class="cards">' + "".join(card(r, side) for _, r in df.iloc[sl].iterrows()) + "</div>",
                        3, f'Top 10 <span class="pk">{word}</span> · {"1 to 5" if part == 1 else "6 to 10"}'))
 
-# 12 evidence chart
+# 13 evidence chart
 S.append(slide(f"""
-<div class="legend"><span><i style="background:{PINK}"></i>My pick</span><span><i style="background:{GREY}"></i>A typical player in the same situations</span></div>
-<h3>Batters · strike rate under pressure</h3><figure class="chart">{CH_BAT}</figure>
-<h3>Bowlers · economy under pressure</h3><figure class="chart">{CH_BOWL}</figure>
-<p class="note">Sears and Carse concede runs at about the typical rate. They are in the list for wickets: each takes one every 16 pressure
-balls. The order within each list comes from the full rating (runs, wickets and the weight of each ball), not from this chart alone.</p>""",
-                 3, 'Every pick beat <span class="pk">a typical player</span>'))
+<p class="lede">Each row is one of my picks. The <b class="pk">pink dot</b> is what he did on pressure balls. The <span class="them">grey dot</span>
+is what an average player did in the same situations. The number on the right is the gap.</p>
+<div class="chartcard"><h4>Batters: strike rate under pressure (higher is better)</h4><figure class="chart">{CH_BAT}</figure></div>
+<div class="chartcard"><h4>Bowlers: economy under pressure (lower is better)</h4><figure class="chart">{CH_BOWL}</figure></div>
+<p class="note">Sears and Carse give away runs at about the average rate. They are in the list for wickets: each takes one every 16 pressure
+balls. The order comes from the full rating (runs, wickets and how much each ball mattered), not from this chart alone.</p>""",
+                 3, 'Every pick beat <span class="pk">an average player</span>'))
 
-# 13 reliability: tests
+# 14 reliability: tests
 S.append(slide(f"""
-<div class="stats3">
- <div><b>51 of 52</b><span>tests on held-back matches in which the top 10 batters beat a typical batter, by about 12 runs per 100 pressure balls</span></div>
- <div><b>50 of 52</b><span>tests in which the top 10 bowlers saved runs, about 8 per 100 pressure balls</span></div>
- <div><b>51 of 52</b><span>tests in which players ranked higher went on to do better: the order holds, not just the list</span></div>
+<div class="fair tight">
+{row("51 / 52", "tests passed<br>(batters)", "Test 1: hide some matches, then check them",
+     "I hid part of the matches, built the ranking on the rest, and checked how the picks did in the hidden matches. I did this 52 times. "
+     "My top 10 batters beat an average batter in 51 of the 52 tests, by about 12 runs per 100 pressure balls. My top 10 bowlers saved runs "
+     "in 50 of 52, about 8 runs per 100 pressure balls. And players ranked higher did better than players ranked lower in 51 of 52.", "check")}
+{row("3,993", "matches the model<br>never saw", "Test 2: matches from outside RR's data",
+     "Cricsheet.org gives free ball-by-ball records. I took every men's T20 match from 2022 to 2026 in these competitions and checked how my "
+     "picks did on pressure balls there. Matches that were also in RR's data were removed, so nothing counts twice.", "globe")}
 </div>
-<h3>The outside exam</h3>
-<p>Cricsheet (cricsheet.org) publishes free ball-by-ball records of professional cricket. I took every men's T20 match from 2022 to
-2026 in these competitions and checked whether the players I ranked highly did well under pressure in them:</p>
 <div class="leagues"><span>T20 internationals incl. 3 World Cups <b>2,030</b></span><span>Vitality Blast <b>635</b></span><span>Big Bash <b>221</b></span>
 <span>Bangladesh PL <b>203</b></span><span>Pakistan SL <b>177</b></span><span>Caribbean PL <b>167</b></span><span>ILT20 <b>134</b></span><span>SA20 <b>130</b></span>
 <span>Major League Cricket <b>109</b></span><span>Lanka PL <b>96</b></span><span>Syed Mushtaq Ali <b>91</b></span></div>
-<figure class="chart">{CH_PUBLIC}</figure>
-<p class="cap">Runs per 100 pressure balls, compared with a typical player in the same situations. Players were matched through 766 matches
-found in both sources; those, and 12 more duplicates, were removed so nothing is counted twice.</p>
+<div class="chartcard"><h4>How my top 10s did in those 3,993 matches</h4>
+<p class="cap"><b>How to read it:</b> +10.8 means that over 100 pressure balls, my top 10 bowlers gave away about 11 fewer runs than an average
+bowler would have in the same situations. +4.2 means my top 10 batters scored about 4 more runs per 100 pressure balls than an average batter.</p>
+<figure class="chart">{CH_PUBLIC}</figure></div>
 <div class="two">
- <div class="box hl"><h4>World Cup knockouts</h4><p>In T20 World Cup semi-finals and finals, Bumrah took 9 wickets at 5.45 an over and Klaasen made 52 off 27.</p></div>
- <div class="box warn"><h4>Where a simpler measure won</h4><p>On these outside matches, plain strike rate under pressure picked a better batting top 10
- than my ratings did. On the 52 tests in the supplied data, my ratings did about five times better. For bowlers, a list
- built on all balls did slightly better at the very top (+12.7 against +10.8), though mine put the whole pool in a better order.</p></div>
-</div>""", 4, 'Tested on matches <span class="pk">it never saw</span>'))
+ <div class="box hl"><h4>World Cup semi-finals and finals</h4><p>Bumrah took 9 wickets at 5.45 an over, and Klaasen made 52 off 27 balls.</p></div>
+ <div class="box warn"><h4>Where a simpler method did better</h4><p>On these outside matches, picking batters by raw strike rate under
+ pressure gave a better top 10 than mine. For bowlers, a list built from all balls did slightly better at the very top (12.7 runs saved
+ against my 10.8). But inside RR's data, over the 52 tests, my batting ratings did about 5 times better than raw strike rate.</p></div>
+</div>""", 4, 'Did the picks hold up on <span class="pk">new matches?</span>'))
 
-# 14 reliability: limits, deep dive, how to repeat
+# 15 limits, deep dive, how to repeat
 S.append(slide(f"""
-<div class="two">
- <div class="box"><h4>Why one season can't judge a batter</h4>
-  <div class="mini3"><div><b>6%</b><span>of the difference between batters in one season is skill</span></div>
-  <div><b>800</b><span>pressure balls before skill is half of what you see</span></div>
-  <div><b>0</b><span>agreement between the two halves of 2026</span></div></div>
-  <p>That is why the batting list missed on 2026 alone, and why all five seasons are used.</p></div>
- <div class="box"><h4>Where it is less certain</h4><ul>
-  <li>Batters are harder to judge than bowlers</li><li>First-innings pressure is measured less sharply</li>
-  <li>On IPL matches alone, only 4 of the 10 bowlers would stay</li>
-  <li>No fielding, dropped catches, pitch or weather in the data</li>
-  <li>2026 was checked more than once while building, so it is not a perfectly clean test</li>
-  <li>Arya, Carse and Overton rest on fewer balls</li></ul>
-  <p>Change one choice at a time and usually 8 of the 10 names stay.</p></div>
+<div class="fair tight">
+{row("6%", "skill in one<br>season", "Why one season can't judge a batter",
+     "In a single season, only about 6% of the difference between batters under pressure is skill. The rest is luck. A batter needs about "
+     "800 pressure balls before skill is half of what you see. That's why I used all five seasons, and why my batting list did not hold up "
+     "when I tested it on 2026 alone.", "bat")}
+{row("8 / 10", "names stay", "If I change my choices",
+     "I changed one choice at a time (the pressure definition, the cut-off, the rating method, the data used). Usually 8 of the 10 names "
+     "stayed. The bowling list depends more on using T20Is too: on IPL matches alone, only 4 of the 10 bowlers would stay.", "scale")}
 </div>
-<div class="gh">{icon('code')}<div><h4>The full method, open to check</h4><p>Code, settings and technical notes are on GitHub, including a report
-on why a simple logistic regression beat ten machine-learning alternatives at predicting who wins. The supplied data is not shared.</p>
-<div class="ghl">{GITHUB}</div></div></div>
-<h3>How to repeat this work</h3>
-<div class="steps8">{''.join(f'<div><b>{i}</b><span>{t}</span></div>' for i, t in enumerate(['Clean the data', 'Rebuild every ball', 'Learn the typical outcome', 'Measure pressure', 'Score every ball', 'Choose settings on 52 tests', 'Rank and rerun 1,000 times', 'Test on 3,993 matches'], 1))}</div>
-<p class="cap">One settings file and a fixed random seed. With the supplied data, running the scripts in order rebuilds every number in this report.</p>
-<div class="closing"><span>In one line</span>The most reliable players under pressure are not the ones who rise above themselves. They are the ones
-who are best when one ball can decide the match.</div>""",
-                 4, 'Limits, and <span class="pk">how to check</span>'))
+<div class="box"><h4>Where I am less sure</h4><ul class="cols2">
+ <li>Batters are much harder to judge than bowlers</li><li>First-innings pressure is measured less sharply</li>
+ <li>No fielding, dropped catches, pitch or weather in the data</li><li>Arya, Carse and Overton have fewer balls</li>
+ <li>I looked at 2026 more than once while building, so it is not a perfectly clean test</li></ul></div>
+<div class="gh">{icon('code')}<div><h4>Want to check my work?</h4><p>All the code, the settings and a technical report (including why the simple
+model beat 10 machine-learning models) are on GitHub. RR's data is not shared.</p><div class="ghl">{GITHUB}</div></div></div>
+<h3>How anyone can repeat this</h3>
+<div class="steps8">{''.join(f'<div><b>{i}</b><span>{t}</span></div>' for i, t in enumerate(['Clean the data', 'Rebuild every ball', 'Learn the average player', 'Measure pressure', 'Score every ball', 'Choose settings on 52 tests', 'Rank and rerun 1,000 times', 'Test on 3,993 matches'], 1))}</div>
+<p class="cap">One settings file and a fixed random seed. With RR's data, running the scripts in order rebuilds every number in this report.</p>""",
+                 4, 'Where I could be <span class="pk">wrong</span>'))
 
-# 15 appendix
+# 16 appendix
 dd = "".join(f"<tr><td class='rk2'>{i + 1}</td><td>{esc(a['name'])}</td><td class='n them'>{int(a.player_id)}</td><td class='gap'></td>"
              f"<td class='rk2'>{i + 1}</td><td>{esc(b['name'])}</td><td class='n them'>{int(b.player_id)}</td></tr>"
              for i, ((_, a), (_, b)) in enumerate(zip(bat10.iterrows(), bowl10.iterrows())))
@@ -569,12 +619,12 @@ S.append(slide(f"""
 <p class="sm"><b>Batters.</b> {nxt_b}</p><p class="sm"><b>Bowlers.</b> {nxt_w}</p>
 <h3>C · Words used</h3>
 <div class="gloss">
-<div><b>Impact</b><span>How far one ball can move a team's chance of winning, on average.</span></div>
-<div><b>Pressure ball</b><span>One of the top fifth of balls on impact × match importance.</span></div>
-<div><b>Typical player, same situations</b><span>What an average player does in the same over, score, wickets, target, ground, season and competition; for bowlers, the same bowling type.</span></div>
-<div><b>Pulled towards average</b><span>Less weight on a record built on few balls (shrinkage).</span></div>
-<div><b>Stays top 10</b><span>How often he stayed in the top 10 over 1,000 rebuilds on reshuffled matches (a bootstrap).</span></div>
-<div><b>Points</b><span>Percentage points of win chance: from 40% to 45% is 5 points.</span></div>
+<div><b>Pressure ball</b><span>One of the 20% of balls whose result can change the match the most (impact × how big the match is).</span></div>
+<div><b>Impact</b><span>How much one ball can change a team's chance of winning, on average.</span></div>
+<div><b>Average player, same situations</b><span>What a typical player does in the same over, score, wickets, target, ground, season and competition. For bowlers, the same type (pace or spin).</span></div>
+<div><b>Pulled towards average</b><span>A record built on few balls gets less trust, so it is moved closer to average (shrinkage).</span></div>
+<div><b>Stays top 10</b><span>How often he stayed in the top 10 when the ranking was rebuilt 1,000 times on reshuffled matches (bootstrap).</span></div>
+<div><b>Strike rate / economy</b><span>Runs per 100 balls faced / runs given away per over.</span></div>
 </div>
 <p class="cap">Data: ball-by-ball data supplied for SupeRR Selector Season 2; outside matches from Cricsheet (cricsheet.org).</p>""",
                  None, 'Dropdown IDs and <span class="pk">the next ten</span>', kicker="Appendix"))
@@ -693,6 +743,20 @@ b { font-weight: 650; }
 .rule.wide { grid-template-columns: 40mm 1fr; margin-top: 3mm; gap: 5mm; }
 .wts div { display: flex; flex-direction: column; margin-bottom: 1.4mm; } .wts span { display: block; height: 2.6mm; background: #e2178f; border-radius: 0 1mm 1mm 0; min-width: 1mm; }
 .wts em { font-style: normal; font-size: 7.4pt; color: #6a6a72; margin-top: 0.4mm; }
+.defbox { background: #011c45; color: #fff; border-radius: 2.5mm; padding: 4mm 5mm 2.5mm; margin-bottom: 3.5mm; }
+.defbox h3 { color: #f4a6d0; margin: 0 0 1.5mm; font-size: 13pt; } .defbox p { font-size: 10.8pt; line-height: 1.55; } .defbox b { color: #fff; }
+.chartcard { background: #fff; border: 1px solid #efe6f0; border-radius: 2.5mm; padding: 3.5mm 4.5mm 2mm; margin-bottom: 3mm; }
+.chartcard h4 { font-size: 11.5pt; margin-bottom: 0.8mm; } .chartcard .cap { margin: 0 0 1.5mm; font-size: 9.2pt; color: #4a4a52; }
+.st3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 3mm; }
+.st3 > div { background: #fff; border: 1px solid #efe6f0; border-radius: 2.5mm; padding: 3.2mm 3.6mm; position: relative; }
+.st3 .fn { position: absolute; right: 3mm; top: 3mm; } .st3 h4 { font-size: 10.6pt; } .st3 p { font-size: 9.4pt; line-height: 1.45; color: #34343c; margin: 0; }
+.fair.tight { gap: 3mm; margin-top: 1mm; margin-bottom: 3mm; } .fair.tight .fr { padding: 4mm 5mm; } .fair.tight .fr p { font-size: 9.8pt; line-height: 1.45; }
+.fair.tight .frn b { font-size: 22pt; } .fair.tight h4 { font-size: 11.5pt; }
+.fair.tight.dense { gap: 2.2mm; } .fair.tight.dense .fr { padding: 2.8mm 5mm; } .fair.tight.dense .fr p { font-size: 9.4pt; line-height: 1.4; }
+.fair.steps { gap: 2.6mm; } .fair.steps .fr { padding: 3.6mm 5mm; grid-template-columns: 30mm 1fr; } .fair.steps .fr p { font-size: 9.9pt; line-height: 1.5; }
+.fair.steps .frn b { font-size: 26pt; } .fair.steps .frn span { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #e2178f; font-size: 7.6pt; }
+.mlt { display: block; width: fit-content; margin-top: 1.6mm; background: #f4f6fb; border-left: 2.4px solid #011c45; padding: 0.6mm 2.4mm; font-size: 8.4pt; font-weight: 600; color: #011c45; border-radius: 0 1.4mm 1.4mm 0; }
+ul.cols2 { columns: 2; column-gap: 8mm; } ul.cols2 li { break-inside: avoid; }
 .example { background: #fff7fb; border-left: 3px solid #e2178f; padding: 3mm 4mm; font-size: 10pt; margin: 3mm 0 0; border-radius: 0 2mm 2mm 0; }
 .closing { margin-top: 6mm; background: #e2178f; color: #fff; border-radius: 2.5mm; padding: 5mm 6mm; font-family: Georgia, serif; font-size: 14pt; line-height: 1.4; }
 .closing span { display: block; font-family: "Segoe UI", sans-serif; font-size: 8pt; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: #ffd6ec; margin-bottom: 1.5mm; }
@@ -733,7 +797,7 @@ th.n, td.n { text-align: right; }
 table.defs tr.win td { font-weight: 700; color: #011c45; background: #fff2f9; }
 table.defs td:first-child { width: 92mm; } table.defs td { padding: 1.5mm 2mm; }
 .sbar { width: 62mm; height: 2.4mm; background: #f1e6ef; border-radius: 1.2mm; overflow: hidden; } .sbar span { display: block; height: 100%; background: #e2178f; }
-table.jobs td:first-child { font-weight: 600; width: 34%; }
+table.jobs td:first-child { font-weight: 600; width: 34%; } table.jobs td { padding: 1.2mm 2mm; font-size: 9.2pt; line-height: 1.3; }
 table.roles td.rl { width: 28%; font-weight: 650; color: #011c45; }
 table.dd td { padding: 1.15mm 2mm; } td.gap, th.gap { width: 8mm; border: none; background: transparent; } td.rk2 { width: 7mm; color: #e2178f; font-weight: 700; }
 .legend { display: flex; gap: 6mm; font-size: 9.6pt; color: #4a4a52; margin: 0 0 1mm; }

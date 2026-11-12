@@ -9,11 +9,12 @@ STEPS = [
     "p10_rank", "p11_robustness", "p14_external", "p14b_family_check", "p12_figures", "p12_report",
     "p13_notebook", "p16_slides_pdf",
 ]
-EXTERNAL = {"p00x_external", "p14_external", "p14b_family_check"}
+# steps that need the Cricsheet downloads, or read tables the outside-match test writes
+EXTERNAL = {"p00x_external", "p14_external", "p14b_family_check", "p12_figures", "p12_report", "p13_notebook", "p16_slides_pdf"}
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--from", dest="start", default=STEPS[0], choices=STEPS)
-ap.add_argument("--skip-external", action="store_true", help="skip the steps that need the Cricsheet downloads")
+ap.add_argument("--skip-external", action="store_true", help="rankings only: skip the outside-match test and the reports built on it")
 ap.add_argument("--skip-deck", action="store_true", help="skip the slide deck (needs local image assets)")
 a = ap.parse_args()
 
