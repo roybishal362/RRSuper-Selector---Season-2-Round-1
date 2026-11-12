@@ -451,7 +451,8 @@ S.append(slide(f"""
      "win rate by 7%, and the first-innings team's by only 3.4%.")}
 {row("41%", "of the rating<br>is first innings", "The first innings still counts",
      "I don't throw any ball away. Every ball counts in the rating, and a ball with more pressure counts more. So first-innings balls are "
-     "not ignored: they make up about 41% of the ratings overall. Rebuilding at 30 for 3 still matters, for the batter and the bowler.")}
+     "not ignored: they make up about 41% of the ratings overall. So a batter who rescues his team from 30 for 3 in the first "
+     "innings gets credit for it, and so does the bowler who took those 3 wickets.")}
 {row("80–94%", "in every<br>league", "It's how T20 works",
      "I checked 3,993 other matches from leagues like the Big Bash, PSL and SA20. In every league, 80% to 94% of pressure balls came in chases. "
      "So this is how T20 cricket is, not a quirk of my model.")}
