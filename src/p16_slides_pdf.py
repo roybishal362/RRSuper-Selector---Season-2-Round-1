@@ -223,19 +223,22 @@ def dumbbell(df, xcol, ecol, xlabel, lower_better, fmt, unit, name=None):
 CH_BAT = dumbbell(bat10, "SR_pressure", "SR_expected_pressure", "Strike rate on pressure balls", False, lambda g: f"+{g:.0f}", "above average", "top10_batters")
 CH_BOWL = dumbbell(bowl10, "econ_pressure", "econ_expected_pressure", "Economy on pressure balls (lower is better)", True,
                    lambda g: (f"{g:.1f} saved" if g >= 0.05 else "level"), "runs saved per over", "top10_bowlers")
-H = T("pressure_heatmap_chase").set_index("over_no")
-H = H[[c for c in H.columns if c in [str(i) for i in range(0, 8)]]]
-fig, ax = plt.subplots(figsize=(6.9, 2.15))
-im = ax.imshow(H.T.values * 100, aspect="auto", cmap=SEQ, vmin=0, vmax=100, origin="lower")
-ax.set_xticks(range(len(H.index))); ax.set_xticklabels(H.index.astype(int), fontsize=7.8)
-ax.set_yticks(range(H.shape[1])); ax.set_yticklabels(H.columns, fontsize=7.8)
-ax.set_xlabel("Over of the chase", fontsize=8.5); ax.set_ylabel("Wickets down", fontsize=8.5)
-for s_ in ax.spines.values():
-    s_.set_visible(False)
-ax.tick_params(length=0)
-cb = fig.colorbar(im, ax=ax, fraction=0.025, pad=0.015); cb.outline.set_visible(False)
-cb.set_label("Pressure (0–100)", fontsize=7.8, color=INK2); cb.ax.tick_params(labelsize=7, length=0)
-CH_HEAT = svg(fig, "pressure_map_chase")
+# both innings, side by side, on the same colour scale
+fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.0), sharey=True, gridspec_kw={"wspace": 0.06})
+for ax, tbl, ttl in ((axes[0], "pressure_heatmap_first", "1st innings: batting first"), (axes[1], "pressure_heatmap_chase", "2nd innings: chasing")):
+    H = T(tbl).set_index("over_no")
+    H = H[[c for c in H.columns if c in [str(i_) for i_ in range(0, 8)]]]
+    im = ax.imshow(H.T.values * 100, aspect="auto", cmap=SEQ, vmin=0, vmax=100, origin="lower")
+    ax.set_xticks([0, 4, 9, 14, 19]); ax.set_xticklabels([1, 5, 10, 15, 20], fontsize=7.6)
+    ax.set_yticks(range(H.shape[1])); ax.set_yticklabels(H.columns, fontsize=7.6)
+    ax.set_xlabel("Over", fontsize=8.2); ax.set_title(ttl, fontsize=8.8, color=NAVY, loc="left", pad=4, fontweight="bold")
+    for s_ in ax.spines.values():
+        s_.set_visible(False)
+    ax.tick_params(length=0)
+axes[0].set_ylabel("Wickets down", fontsize=8.2)
+cb = fig.colorbar(im, ax=axes, fraction=0.02, pad=0.015); cb.outline.set_visible(False)
+cb.set_label("Pressure (0–100)", fontsize=7.6, color=INK2); cb.ax.tick_params(labelsize=7, length=0)
+CH_HEAT = svg(fig, "pressure_map_both_innings")
 ev = EV[EV.method.str.startswith("CHOSEN")]
 grp = ["all public matches", "T20 World Cups", "franchise leagues", "full-member T20Is (incl. World Cups)"]
 lab = {"all public matches": "All 3,993 matches", "T20 World Cups": "T20 World Cups", "franchise leagues": "Franchise leagues",
@@ -438,9 +441,8 @@ than a dead rubber. I also tried other cut-offs from the top 10% to the top 30% 
 
 # 05 pressure: where it happens
 S.append(slide(f"""
-<div class="chartcard"><h4>Where pressure is highest in a chase</h4>
-<p class="cap">Each square is one situation, for example "over 17, 4 wickets down". The darker the pink, the more pressure. It is highest
-along the band where the chase can still go either way, and fades when the chasing team has collapsed (top left) or is cruising (bottom right).</p>
+<div class="chartcard"><h4>Where pressure is highest, in each innings</h4>
+<p class="cap">Each square is one situation, for example "over 17, 4 wickets down". Darker pink means more pressure, on the same scale for both. <b>Batting first</b>, pressure is lighter and spread out. <b>Chasing</b>, it is darker wherever the chase can still go either way.</p>
 <figure class="chart">{CH_HEAT}</figure></div>
 <div class="fair tight dense">
 {row("9 in 10", "pressure balls<br>come in chases", "Why chases?",

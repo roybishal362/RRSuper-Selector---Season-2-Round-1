@@ -123,9 +123,9 @@ Every ball gets a pressure score in three steps:
 - Batters get out 8% more often than on other balls at the same stage of an innings.
 
 <div align="center">
-<img src="docs/figures/pressure_map_chase.png" width="80%" alt="Heat map of average pressure in a chase by over (1 to 20) and wickets down (0 to 7). Pressure is highest along a diagonal band where the chase can still go either way, and fades when the chasing team has collapsed or is cruising.">
+<img src="docs/figures/pressure_map_both_innings.png" width="90%" alt="Two heat maps of average pressure by over (1 to 20) and wickets down (0 to 7), on the same colour scale. Batting first, pressure is lighter and spread out, highest in the powerplay with few wickets down and in the last overs. Chasing, it is darker along the band where the chase can still go either way.">
 
-<sub>Where pressure is highest in a chase. Each square is one situation, such as "over 17, 4 wickets down". The darker the pink, the more pressure.</sub>
+<sub>Where pressure is highest, in each innings. Each square is one situation, such as "over 17, 4 wickets down". Darker pink means more pressure, on the same scale for both. Batting first, pressure is lighter and spread out; chasing, it is darker wherever the chase can still go either way.</sub>
 </div>
 
 **Why do 9 in 10 pressure balls come in chases?** In a chase both teams know the target, so every run and every wicket changes the result directly. Batting first, nobody knows yet what a winning score is. This is not a quirk of my model: in every league I checked, 80% to 94% of pressure balls came in chases. First-innings balls still count, because every ball counts in the rating and a higher-pressure ball just counts more. Overall, first-innings balls make up about 41% of the ratings.
