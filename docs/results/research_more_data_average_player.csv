@@ -1,0 +1,9 @@
+model,judged_on,logloss,worst_class_rate_error_pct
+RR data only,outside testing half (all),1.5653462772961007,2.438507410512969
+RR data only,outside testing half (associate T20Is),1.5650219235890388,4.531077514349324
+RR data only,outside testing half (franchise leagues),1.5686734804307576,1.120269672597865
+RR data + outside learning half,outside testing half (all),1.547351768732265,0.1785375479652948
+RR data + outside learning half,outside testing half (associate T20Is),1.536522024784293,0.2555000540780103
+RR data + outside learning half,outside testing half (franchise leagues),1.5600899036479932,0.26060510849165996
+RR data only,RR's own hidden matches,1.5780994419869752,0.04161982522597821
+RR data + outside learning half,RR's own hidden matches,1.57605978441895,0.11931673594094416

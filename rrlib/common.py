@@ -8,7 +8,8 @@ import yaml
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = yaml.safe_load(open(os.path.join(ROOT, "config.yaml"), encoding="utf-8"))
 RAW = os.path.join(ROOT, CFG["paths"]["raw"])
-OUT = os.path.join(ROOT, CFG["paths"]["out"])
+# RR_OUT lets a full re-run write somewhere else (used to check the notebooks reproduce the results)
+OUT = os.environ.get("RR_OUT") or os.path.join(ROOT, CFG["paths"]["out"])
 DATA, MODELS, TABLES, FIGS, LOGS = (os.path.join(OUT, d) for d in ("data", "models", "tables", "figures", "logs"))
 for _d in (DATA, MODELS, TABLES, FIGS, LOGS):
     os.makedirs(_d, exist_ok=True)

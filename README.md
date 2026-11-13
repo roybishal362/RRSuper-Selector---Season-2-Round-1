@@ -26,7 +26,7 @@ in exactly the same situation, and tests the picks on matches the model never sa
 
 [The short version](#the-short-version) · [Top 10s](#my-top-10s) · [Pressure](#what-is-pressure) · [How it works](#how-it-works) ·
 [Machine learning](#the-machine-learning-inside) · [The brief, item by item](#the-brief-item-by-item) · [Does it hold up?](#does-it-hold-up) ·
-[Where it could be wrong](#where-it-could-be-wrong) · [Run it](#run-it-yourself)
+[Extra research](#extra-research-would-stacking-or-more-data-help) · [Where it could be wrong](#where-it-could-be-wrong) · [How it was built](docs/how_it_was_built.md) · [Run it](#run-it-yourself)
 
 <sub>Built for <b>SupeRR Selector Season 2 · Round 1</b> (Rajasthan Royals). Bishal Roy · <a href="mailto:roybishal9989@gmail.com">roybishal9989@gmail.com</a></sub>
 
@@ -145,14 +145,14 @@ flowchart LR
     H -. checked on .-> X["3,993 outside matches"]
 ```
 
-| Step | In plain words | Technique | Code |
+| Step | In plain words | Technique | Notebook |
 |---|---|---|---|
-| **1. Rebuild every ball** | I fixed how extras are recorded and rebuilt the score, wickets, target and balls left before every ball. | Data cleaning and checks | `p00_audit.py`, `p01_state.py`, `p02_features.py` |
-| **2. Predict who wins** | The chance of winning before every ball, for both innings. | Logistic regression, chosen over 10 other models | `p03_context_models.py`, `p03b_model_zoo.py` |
-| **3. Score the pressure** | Impact × how big the match is. The top 20% are pressure balls. | 38 signals, 3 tests, 8 definitions compared | `p04_pressure.py` |
-| **4. Learn what an average player does** | What an average player does in each situation: how often a dot, a single, a four, a six or a wicket. It never sees player names. | LightGBM (gradient boosting), 41 inputs | `p03_context_models.py` |
-| **5. Rate every player** | On every ball: the player's result minus the average player's, with pressure balls counting most. Players with few balls are pulled towards average. | Empirical Bayes shrinkage | `p05_value.py`, `p06_ratings.py`, `ratings_lib.py` |
-| **6. Choose the settings and test** | Settings chosen by hiding matches and checking the picks on them. Then the ranking was rebuilt 1,000 times, and the picks were tested on 3,993 outside matches. | Cross-validation, bootstrap, outside test | `p09_experiments.py`, `p10_rank.py`, `p11_robustness.py`, `p14_external.py` |
+| **1. Rebuild every ball** | I fixed how extras are recorded and rebuilt the score, wickets, target and balls left before every ball. | Data cleaning and checks | [01](notebooks/01_clean_the_data.ipynb), [02](notebooks/02_rebuild_every_ball.ipynb) |
+| **2. Predict who wins** | The chance of winning before every ball, for both innings. | Logistic regression, chosen over 10 other models | [04](notebooks/04_win_chance_and_average_player.ipynb), [05](notebooks/05_why_logistic_regression_won.ipynb) |
+| **3. Score the pressure** | Impact × how big the match is. The top 20% are pressure balls. | 38 signals, 3 tests, 8 definitions compared | [06](notebooks/06_pressure.ipynb) |
+| **4. Learn what an average player does** | What an average player does in each situation: how often a dot, a single, a four, a six or a wicket. It never sees player names. | LightGBM (gradient boosting), 41 inputs | [04](notebooks/04_win_chance_and_average_player.ipynb) |
+| **5. Rate every player** | On every ball: the player's result minus the average player's, with pressure balls counting most. Players with few balls are pulled towards average. | Empirical Bayes shrinkage | [07](notebooks/07_value_of_every_ball.ipynb), [08](notebooks/08_rating_models.ipynb) |
+| **6. Choose the settings and test** | Settings chosen by hiding matches and checking the picks on them. Then the ranking was rebuilt 1,000 times, and the picks were tested on 3,993 outside matches. | Cross-validation, bootstrap, outside test | [11](notebooks/11_choose_settings.ipynb), [12](notebooks/12_final_rankings.ipynb), [13](notebooks/13_robustness.ipynb), [14](notebooks/14_outside_test.ipynb) |
 
 **Why not compare a player with his own normal game?** The brief talks about players' usual levels, so I tested this first.
 - For every player I measured pressure performance minus normal performance. Then I split his matches into two halves.
@@ -170,6 +170,43 @@ Machine learning is used to work out what is normal in each situation. It never 
 | **Empirical Bayes** | Fair ratings for players with few balls | A player with 60 pressure balls is trusted less than one with 500, so his rating is pulled towards average. |
 | **Bootstrap** (1,000 rebuilds) | How sure each pick is | Gives the "stays top 10" figure for every player. |
 | **Semi-supervised roles, clustering** | Labels such as opener, finisher, death bowler | Used only for labels and checks, never to rank. |
+
+### How to read the error numbers
+
+The models are scored with **log-loss**. It is **not a percentage**: an error of 1.578 does not mean "158% wrong".
+
+- **How it works.** For every ball, a model gives a chance to each possible result. Log-loss looks only at the chance it gave to what **actually happened**:
+  - if it gave that result a 50% chance, the ball costs 0.69;
+  - at 30%, it costs 1.20;
+  - at 10%, it costs 2.30.
+- **The score** is the average over all balls. Lower is better.
+- **Why not zero?** Zero would mean the model was 100% sure and always right. That is impossible in cricket, because even the best bowler gets hit for four. So judge the score against simple baselines, not against zero:
+
+| Average-player model (8 possible results per ball) | Log-loss |
+|---|---:|
+| Blind guess: 12.5% for each result | 2.079 |
+| Only the overall rates (30% dots, 36% singles, and so on) | 1.637 |
+| **LightGBM (used)** | **1.578** |
+
+| Win-chance model (2 possible results: win or lose) | Log-loss |
+|---|---:|
+| Coin toss: 50% each | 0.693 |
+| **Logistic regression (used), chases** | **0.393** |
+
+- **Don't compare the two tables with each other.** One model picks between 8 results, the other between 2.
+- **A simpler check is whether the predicted rates are right.** The average-player model predicts dots 30.23% of the time; they actually happen 30.21% of the time. For wickets it is 5.44% against 5.41%.
+
+### Why the simple model wins one job and LightGBM wins the other
+
+| | Win chance | Average player |
+|---|---|---|
+| **What is predicted** | Who wins the match | What happens on this ball |
+| **Independent answers** | About 820 in the chases: all balls of a match share one result | 200,961: every ball has its own result |
+| **Can a model memorise?** | Yes. The match details (target, ground, season, team strength) are the same for every ball of a match, and together they are unique to that match, like a fingerprint. | No. One match has many different results, so there is nothing per match to memorise. |
+| **What happened** | Tree models learned "this fingerprint → this team won". Given only the match details, LightGBM scored 0.0001 on matches it had seen, a perfect memory, but 1.93 on new matches: far worse than a coin toss (0.69). | LightGBM learned real patterns, such as how a new batter plays at 4 down at the death against pace. |
+| **Winner on new matches** | **Logistic regression: 0.393** against 0.400 for the best tree model or stack | **LightGBM: 1.578** against 1.594 for logistic regression |
+
+The lesson: the right model depends on how many **independent** answers there are, not on how many rows. Logistic regression cannot memorise a fingerprint. It can only learn smooth rules ("more runs needed per ball means a lower chance of winning"), and those carry over to new matches.
 
 <div align="center">
 <img src="docs/figures/model_zoo.png" width="100%" alt="Left: training error against error on unseen matches for each win-probability model; the chosen logistic regression has the smallest gap, while random forest, LightGBM and XGBoost have large gaps. Right: error on unseen matches as training data grows; the logistic regression catches up and passes the tree models with all the data.">
@@ -211,6 +248,49 @@ Matches also in the supplied data were removed, so nothing counts twice.
 > - For bowlers, a top 10 picked from all balls (not just pressure balls) saved slightly more runs: 12.7 against my 10.8. My ranking still put the whole pool of bowlers in a better order.
 > - In the 52 tests on the supplied data, my batting top 10 did about 5 times better than a raw strike rate top 10. I report all of these.
 
+## Extra research: would stacking or more data help?
+
+These tests are **not** used in the lists. I ran them to see whether the method could be improved. Details are in
+[notebook 17](notebooks/17_research_more_data_and_stacking.ipynb).
+
+**1. Stacking the average-player model.** Several models were combined, and each was judged on RR's hidden matches. The error is log-loss: lower is better, and it is not a percentage ([how to read it](#how-to-read-the-error-numbers)).
+
+| Average-player model | Error on hidden matches |
+|---|---:|
+| No model (overall frequencies only) | 1.637 |
+| Logistic regression | 1.594 |
+| ExtraTrees | 1.581 |
+| XGBoost | 1.578 |
+| **LightGBM (used)** | **1.578** |
+| Average of LightGBM and XGBoost | 1.578 |
+| Stacking all four, with a logistic regression on top | 1.577 |
+
+Stacking is better by 0.0007, about 1% of what LightGBM already gains over no model. It is not worth the extra complexity.
+
+**2. More data for the average player.** The model learned from RR's 2 lakh balls plus about 5 lakh outside balls, and was tested on the other 4 lakh outside balls.
+
+| Tested on | RR data only | RR + outside data |
+|---|---:|---:|
+| Outside matches | 1.565 | **1.547** |
+| RR's own hidden matches | 1.578 | **1.576** |
+
+- **On outside matches, it helps a lot.** This is expected, because half of the outside matches are T20Is between associate nations, a different kind of cricket.
+- **On RR's own IPL and T20I matches, it barely helps** (0.002).
+
+**3. More data for batter ratings.** Batters were rated on RR's data plus outside matches, then checked on other outside matches. I ran 6 tests: 5 random splits and 1 forward in time (learn 2022 to 2024, test 2025 to 2026). "Order" below is the rank correlation between the rating and what happened: 0 means no link, 1 means a perfect match.
+
+| Rating built on | Order of all batters (average) | Top 10, extra runs per 100 pressure balls (average, range) |
+|---|---:|---:|
+| RR data only | 0.051 | +3.5 (−4.8 to +11.1) |
+| RR + outside data | 0.060 | −1.0 (−9.9 to +9.5) |
+| Outside data only | −0.013 | −0.5 |
+
+- **No clear gain.** The order of all batters got slightly better, but the top 10 got slightly worse.
+- **The differences are noise.** Both are much smaller than the swing from one test to the next, and the forward-in-time test got worse.
+- **A warning case.** With all outside matches added, the #1 batter would be a county player with 0 pressure balls in RR's data; all 158 of his came in England's Vitality Blast.
+
+**Verdict.** The main method stays as it is. More data helps only when it comes from the same kind of cricket.
+
 ## Where it could be wrong
 
 - **Batters are hard to judge from one season.**
@@ -230,36 +310,32 @@ Matches also in the supplied data were removed, so nothing counts twice.
 <summary><b>Repository layout</b></summary>
 
 ```
-config.yaml                every threshold, weight, seed and path
+config.yaml                              every threshold, weight, seed and path
 requirements.txt
-src/
-  run_all.py               runs the whole pipeline in order
-  common.py                paths, config, IO, eligibility helpers
-  ratings_lib.py           rating models (ridge, empirical Bayes, composite)
-  p00_audit.py             data audit and cleaning
-  p00x_external.py         Cricsheet parsing and player linking
-  p01_state.py             ball-state rebuild, match context (Elo, venue par, points tables)
-  p02_features.py          feature store and catalogue
-  p03_context_models.py    average-player, win-probability and run-expectancy models
-  p03b_model_zoo.py        11-model comparison, fingerprint test, learning curves
-  p04_pressure.py          38 pressure signals, 3 tests, 8 definitions
-  p05_value.py             value of every ball (four versions)
-  p06_ratings.py           rating models and the "own usual level" test
-  p07_unsupervised.py      usage-based roles and clustering checks (labels only)
-  p08_selection.py         feature selection scorecard
-  p09_experiments.py       52 hidden-match tests and settings choice
-  p10_rank.py              final rankings, 1,000 bootstrap rebuilds
-  p11_robustness.py        sensitivity, ablations, fake-pressure checks, noise checks
-  p12_figures.py           figures
-  p12_report.py            methodology report (Markdown)
-  p13_notebook.py          evidence notebook: every number next to its source table
-  p14_external.py          test on 3,993 outside matches
-  p14b_family_check.py     evidence for the rating-method choice
-  p16_slides_pdf.py        the submitted deck (needs local image assets, not included)
+notebooks/
+  01_clean_the_data.ipynb                fix extras, super overs, player IDs
+  02_rebuild_every_ball.ipynb            the situation before every ball
+  03_outside_matches.ipynb               Cricsheet matches, used only for testing
+  04_win_chance_and_average_player.ipynb win-chance and average-player models
+  05_why_logistic_regression_won.ipynb   11-model comparison, memorisation test
+  06_pressure.ipynb                      38 signals, 3 tests, 8 definitions
+  07_value_of_every_ball.ipynb           player minus average, on every ball
+  08_rating_models.ipynb                 rating methods, the "own usual level" test
+  09_roles_and_clusters.ipynb            role labels (never used to rank)
+  10_feature_checks.ipynb                which situation facts matter
+  11a_settings_test_setup.ipynb          the 52 hidden-match tests
+  11_choose_settings.ipynb               settings chosen on those tests
+  12_final_rankings.ipynb                final lists, 1,000 rebuilds
+  13_robustness.ipynb                    change one thing at a time
+  14_outside_test.ipynb                  the 3,993-match exam
+  15_rating_method_check.ipynb           evidence for the rating method
+  16_figures.ipynb                       charts
+  17_research_more_data_and_stacking.ipynb   extra research (not used in the lists)
+rrlib/                                   two small shared helpers the notebooks import
 docs/
-  win_probability_model.md technical report: why the simple model won
-  figures/, images/        charts used here
-  results/                 model-comparison tables
+  how_it_was_built.md                    map of everything tried, kept and dropped
+  win_probability_model.md               why the simple model won
+  figures/, images/, results/
 ```
 
 </details>
@@ -270,11 +346,9 @@ docs/
    ```
 2. **Add the data.** Put the supplied competition data pack in `6af3166e7b922_data_pack/` at the top of the repository. It is not included here.
 3. **Add the outside matches** (needed for the outside-match test and the reports). Download the men's T20 JSON zips from [cricsheet.org/downloads](https://cricsheet.org/downloads/) into `external/cricsheet_raw/`, with `people.csv` and `names.csv`. The zips used are `it20s`, `t20s`, `icc_mens_t20_world_cup`, `ipl`, `bbl`, `bpl`, `cpl`, `ilt`, `lpl`, `mlc`, `ntb`, `psl`, `sat` and `sma`, each as `<name>_male_json.zip`.
-4. **Run:**
-   ```bash
-   python src/run_all.py                    # everything, in order
-   python src/run_all.py --skip-external    # rankings only, without the outside matches
-   ```
+4. **Run the notebooks in order** from the `notebooks/` folder: 01, 02, 03, then 04 to 16. Notebook 17 is optional research.
+
+**Checked:** running all 17 notebooks from scratch gives exactly the same top 10s, scores, "stays top 10" figures and settings as the submitted results.
 
 Every setting lives in `config.yaml`, and every random step uses one fixed seed (2026). Results are written to `outputs/`, which is not tracked.
 

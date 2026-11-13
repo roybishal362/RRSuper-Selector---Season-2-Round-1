@@ -41,7 +41,9 @@ Because impact is built from differences between predicted probabilities, calibr
 - **Tuning.** Each model's complexity setting (tree depth, leaf size, number of neighbours, penalty) was chosen on three inner match-grouped folds of the training part only. Boosted models also early-stopped on a 15% match-level slice of their own training data.
 - **Metrics on unseen matches.** Log-loss (the main score), Brier score, AUC, expected calibration error (ECE), calibration slope (1.0 is ideal: below 1 means too extreme, above 1 too timid), calibration in the last overs, and the **overfitting gap** (test log-loss minus training log-loss).
 
-Code: `src/p03b_model_zoo.py`. Tables: `docs/results/model_zoo.csv`, `model_zoo_fingerprint.csv`, `model_zoo_learning_curve.csv`, `wp_logistic_designs.csv`.
+> **Reading log-loss.** It is not a percentage. For each ball it charges −ln(the chance the model gave to what actually happened): 50% costs 0.69, 30% costs 1.20, 10% costs 2.30. The score is the average, lower is better, and 0 (always 100% sure and right) is impossible in cricket. For a win-or-lose prediction a coin toss scores 0.693, so the final chase model's 0.393 means it is far better than guessing.
+
+Notebook: [`notebooks/05_why_logistic_regression_won.ipynb`](../notebooks/05_why_logistic_regression_won.ipynb). Tables: `docs/results/model_zoo.csv`, `model_zoo_fingerprint.csv`, `model_zoo_learning_curve.csv`, `wp_logistic_designs.csv`.
 
 ## 4. Results: chases
 
@@ -148,10 +150,6 @@ No first-innings model reached the AUC target of 0.72 that I had set in advance.
 
 ## 9. Reproducing
 
-```bash
-python src/p03_context_models.py          # fits the final win-probability and ball-outcome models
-python src/p03b_model_zoo.py              # the full comparison (slow: every model, tuned, on match-grouped folds)
-python src/p03b_model_zoo.py designs      # only the logistic design comparison (sections 6 and 7)
-```
+Run [`04_win_chance_and_average_player.ipynb`](../notebooks/04_win_chance_and_average_player.ipynb) (the final models), then [`05_why_logistic_regression_won.ipynb`](../notebooks/05_why_logistic_regression_won.ipynb) (the full comparison; slow, because every model is tuned on match-grouped folds).
 
 Results are written to `outputs/tables/` (the copies used here are in `docs/results/`). The figure `docs/figures/model_zoo.png` shows training against unseen-match log-loss for every model, and the learning curves.

@@ -1,4 +1,4 @@
-# Allow-list. Only code, settings and documentation are tracked.
+# Allow-list. Only notebooks, the small helper package, settings and documentation are tracked.
 # The supplied competition data, everything derived from it at ball level, the Cricsheet downloads,
 # model files, player photos and team branding must never be committed.
 /*
@@ -6,13 +6,12 @@
 !/README.md
 !/requirements.txt
 !/config.yaml
-!/src/
+!/notebooks/
+!/rrlib/
 !/docs/
 
-# inside src: no caches, no superseded versions
-/src/__pycache__/
-/src/*_v1*.py
-/src/p15_report_pdf.py
+**/.ipynb_checkpoints/
+**/__pycache__/
 *.pyc
 *.parquet
 *.zip
