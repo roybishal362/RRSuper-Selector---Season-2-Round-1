@@ -331,6 +331,8 @@ notebooks/
   15_rating_method_check.ipynb           evidence for the rating method
   16_figures.ipynb                       charts
   17_research_more_data_and_stacking.ipynb   extra research (not used in the lists)
+  18_one_match_check_and_deck_numbers.ipynb  does a pick lean on one match? + extra deck numbers
+external/                                Cricsheet matches, used only for testing (ODC-By, see external/README.md)
 rrlib/                                   two small shared helpers the notebooks import
 docs/
   how_it_was_built.md                    map of everything tried, kept and dropped
@@ -345,17 +347,17 @@ docs/
    pip install -r requirements.txt
    ```
 2. **Add the data.** Put the supplied competition data pack in `6af3166e7b922_data_pack/` at the top of the repository. It is not included here.
-3. **Add the outside matches** (needed for the outside-match test and the reports). Download the men's T20 JSON zips from [cricsheet.org/downloads](https://cricsheet.org/downloads/) into `external/cricsheet_raw/`, with `people.csv` and `names.csv`. The zips used are `it20s`, `t20s`, `icc_mens_t20_world_cup`, `ipl`, `bbl`, `bpl`, `cpl`, `ilt`, `lpl`, `mlc`, `ntb`, `psl`, `sat` and `sma`, each as `<name>_male_json.zip`.
-4. **Run the notebooks in order** from the `notebooks/` folder: 01, 02, 03, then 04 to 16. Notebook 17 is optional research.
+3. **The outside matches are included.** `external/cricsheet_raw/` holds the exact Cricsheet downloads used (11 Nov 2026), so the outside-match test can be rebuilt as it was run. Cricsheet updates its files over time; newer downloads from [cricsheet.org/downloads](https://cricsheet.org/downloads/) will add matches.
+4. **Run the notebooks in order** from the `notebooks/` folder: 01, 02, 03, then 04 to 16, then 18. Notebook 17 is optional research.
 
-**Checked:** running all 17 notebooks from scratch gives exactly the same top 10s, scores, "stays top 10" figures and settings as the submitted results.
+**Checked:** running all 17 notebooks from scratch gives exactly the same top 10s, scores, "stays top 10" figures and settings as the submitted results. Notebook 18, run from this repository's code, reproduced its result tables byte for byte.
 
 Every setting lives in `config.yaml`, and every random step uses one fixed seed (2026). Results are written to `outputs/`, which is not tracked.
 
 ## Data policy
 
 - **The competition data is not in this repository**, and nothing built from it at ball level is either. The competition rules do not allow it to be shared. The `.gitignore` is an allow-list, so only code and documents can ever be committed.
-- **Cricsheet data** is © Cricsheet, under the Open Data Commons Attribution License. I used it for testing only and do not redistribute it.
+- **Cricsheet data** is from [Cricsheet](https://cricsheet.org), under the Open Data Commons Attribution License (ODC-By 1.0). It is included in `external/` so the outside-match test can be reproduced; it was used for testing only, never to build or tune the rankings.
 - **The submitted deck is not here.** It contains player photos and team branding.
 
 ## Author

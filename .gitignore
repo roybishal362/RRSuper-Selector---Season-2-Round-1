@@ -1,6 +1,6 @@
 # Allow-list. Only notebooks, the small helper package, settings and documentation are tracked.
-# The supplied competition data, everything derived from it at ball level, the Cricsheet downloads,
-# model files, player photos and team branding must never be committed.
+# The supplied competition data, everything derived from it at ball level, model files, player photos and team
+# branding must never be committed. The public Cricsheet data (ODC-By) in external/ is allowed, for reproducibility.
 /*
 !/.gitignore
 !/README.md
@@ -17,3 +17,15 @@
 *.zip
 *.joblib
 *.pkl
+
+# public Cricsheet data only (never the supplied competition data)
+!/external/
+/external/*
+!/external/README.md
+!/external/cricsheet_raw/
+!/external/cricsheet_raw/*.zip
+!/external/cricsheet_raw/people.csv
+!/external/cricsheet_raw/names.csv
+!/external/parsed/
+!/external/parsed/matches.parquet
+!/external/parsed/balls.parquet
