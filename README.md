@@ -303,6 +303,7 @@ Stacking is better by 0.0007, about 1% of what LightGBM already gains over no mo
 - **Some picks rest on fewer balls.** Arya, Carse and Overton have the smallest samples.
 - **2026 is not a perfectly clean test.** I looked at it more than once while building.
 - **The lists are fairly stable.** Changing one choice at a time usually keeps 8 of the 10 names.
+- **Batting was tested further.** Crediting strike rotation (1s, 2s, 3s) kept the same 10 batters ([notebook 19](notebooks/19_strike_rotation_test.ipynb)). About 250 real batting features (yorkers, slower balls, collapse entry, chases above 9 an over, shot choice and more) with feature selection did not predict hidden matches or the next season better than the rating: 0.134 against 0.143 ([notebooks 20](notebooks/20_batting_features_round1.ipynb) and [21](notebooks/21_batting_features_round2.ipynb)).
 
 ## Run it yourself
 
@@ -332,6 +333,9 @@ notebooks/
   16_figures.ipynb                       charts
   17_research_more_data_and_stacking.ipynb   extra research (not used in the lists)
   18_one_match_check_and_deck_numbers.ipynb  does a pick lean on one match? + extra deck numbers
+  19_strike_rotation_test.ipynb            does crediting 1s, 2s and 3s change the batting list?
+  20_batting_features_round1.ipynb         ~150 real batting features + feature selection v the rating
+  21_batting_features_round2.ipynb         ~250 features, adding groups from published work
 external/                                Cricsheet matches, used only for testing (ODC-By, see external/README.md)
 rrlib/                                   two small shared helpers the notebooks import
 docs/
@@ -348,9 +352,9 @@ docs/
    ```
 2. **Add the data.** Put the supplied competition data pack in `6af3166e7b922_data_pack/` at the top of the repository. It is not included here.
 3. **The outside matches are included.** `external/cricsheet_raw/` holds the exact Cricsheet downloads used (11 Nov 2026), so the outside-match test can be rebuilt as it was run. Cricsheet updates its files over time; newer downloads from [cricsheet.org/downloads](https://cricsheet.org/downloads/) will add matches.
-4. **Run the notebooks in order** from the `notebooks/` folder: 01, 02, 03, then 04 to 16, then 18. Notebook 17 is optional research.
+4. **Run the notebooks in order** from the `notebooks/` folder: 01, 02, 03, then 04 to 16, then 18 to 21. Notebook 17 is optional research.
 
-**Checked:** running all 17 notebooks from scratch gives exactly the same top 10s, scores, "stays top 10" figures and settings as the submitted results. Notebook 18, run from this repository's code, reproduced its result tables byte for byte.
+**Checked:** running all 17 notebooks from scratch gives exactly the same top 10s, scores, "stays top 10" figures and settings as the submitted results. Notebooks 18 to 21, run from this repository's code, reproduced their result tables byte for byte.
 
 Every setting lives in `config.yaml`, and every random step uses one fixed seed (2026). Results are written to `outputs/`, which is not tracked.
 
