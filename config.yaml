@@ -1,9 +1,11 @@
 # SupeRR Selector S2 - Round 1. Every threshold, weight, seed and path lives here.
 seed: 2026
-n_jobs: 14
+n_jobs: 6                       # was 14; 6 keeps the bootstrap workers inside 16 GB RAM
 
 paths:
   raw: 6af3166e7b922_data_pack
+  # corrected file issued by Unstop on 16 Nov 2026 (extras1_runs = real extra runs). The original is ball_by_ball.csv.
+  ball_file: 6af855c0e8386_ball_by_ball
   out: outputs
 
 data:
@@ -52,6 +54,16 @@ pressure:
 ratings:
   bootstrap_reps: 1000
   ci: 0.90
+  # Review decision (2026-11-16, corrected data file): empirical Bayes shrinks each player toward the REAL average of
+  # the value being rated (its ball-weighted mean in the data), not toward 0. The expected-value model misses byes and
+  # the extra runs of wides / no-balls, so the bowler value averages -0.038 runs per ball (pressure-weighted) and 0
+  # was not the average: small samples were pulled up. Tested as a correction (P31, rule fixed in advance): ties on
+  # the 3,993 outside matches (bowl P = 0.55, bat P = 0.67), internal checks tie / slightly better; same top 10s.
+  shrink_to: data_mean            # data_mean | zero (the original)
+  # Review decision (2026-11-16): a dismissal off a wide (35 stumpings / run-outs of the striker) is charged to the
+  # batter like any other dismissal. Before, a wide was "not a ball faced", so the dismissal was lost. P31: outside
+  # tie (P = 0.87), internal +0.0003 (SE 0.0001); same top 10.
+  charge_wide_dismissals: true
 
 selection:
   w_d_grid: [0.0, 0.25, 0.5, 1.0]
@@ -66,12 +78,25 @@ selection:
   # yardstick scores the same hard pressure balls R3 rates), the old pressure-weighted top 10 did better in 4 of 5
   # independent comparisons (2026 + public subgroups).
   model_family: {bat: R2-weighted, bowl: R2-weighted}
-  # Review decision (2026-11-12): bowlers use emphasis alpha 0.5 and shrinkage x2. The stage-by-stage search reached
-  # alpha 1.0 / x1 (it tunes one setting at a time and never tried alpha 0.5 with x2). P14b (table
-  # rating_family_check_decision_evidence) found alpha 0.5 / x2 better in 8 of 11 comparisons: the 50 random splits
-  # (paired +0.016, SE 0.004), 2026 (rank corr and top-10) and 5 of 8 public-data comparisons. It also shrinks small
-  # samples harder. The rule's own pick is kept in p09_summary['rule_pick'] and compared in P14b.
-  override: {bowl: {alpha: 0.5, k_mult: 2.0}}
+  # Bowlers (review decision, 2026-11-16, corrected data file): v1, alpha 0.5, shrinkage x1, no consistency weight.
+  # The 12 Nov decision (alpha 0.5, x2) is retired: x2 v x1 is a tie everywhere (50 splits paired +0.0002, SE 0.0002;
+  # 2026 identical; outside 0.303 v 0.305), same 10 bowlers. With shrinkage toward the real average switched on, the
+  # stage-by-stage rule moves to v3 + consistency 0.5 + x0.5 + alpha 1.0; head-to-head (P31b, rule fixed in advance):
+  # it is clearly WORSE on the 3,993 outside matches (0.206 v 0.279; better in 1% of 1,000 bootstraps) and on 2026
+  # (0.149 v 0.171; top-10 lift 34 v 54), and only +0.0057 (SE 0.0034) on the 52 checks it was tuned on. So the
+  # tested setup stays. Evidence: research_bowler_setup_h2h.csv. The rule's own pick is kept in p09_summary['rule_pick'].
+  # Batters (review decision, 2026-11-16): batting value v3 (the value submitted on 14 Nov). On the corrected file
+  # Stage A picked v1, but Stage A compares values under R2-joint, a family that is not used. Under the final setup
+  # (R2-weighted, alpha 0.5, x2, floor 60): v3 has the best score on the 50 random splits (0.144 v v1 0.136, paired
+  # +0.0077, SE 0.0026; v v4 0.132, +4 SE); on the P9 objective v3 0.128 and v4 0.129 tie (v4 leads only on the 2
+  # rolling splits), v1 0.122; outside matches: v3 v v1 tie (P = 0.58, v3 slightly ahead); v3 recovers planted skill
+  # better (3.1 v 2.1 of 10 in the top 25) and is steadier under other pressure definitions. With v1, 3 names would
+  # change (Patidar, Pooran, Kohli for Jaiswal, Inglis, Arya). Evidence: research_review_challengers*.csv (P31).
+  # The rule's own pick is kept in p09_summary['rule_pick'].
+  # Both setups are pinned in full (every setting the P31 / P31b tests used), so a later stage-by-stage drift cannot
+  # silently change them.
+  override: {bat: {value: v3, alpha: 0.5, k_mult: 2.0, w_c: 0.0, w_d: 0.0},
+             bowl: {value: v1, alpha: 0.5, k_mult: 1.0, w_c: 0.0, w_d: 0.0}}
   # Evidence floor for BOTH lists: to be ranked under pressure a player needs >= 60 pressure balls. P9 chose 60 for
   # batters itself; its yardstick only scores players with enough test-match pressure balls, so it cannot see (or
   # penalise) low-exposure players and cannot choose this for bowlers.

@@ -10,10 +10,17 @@ R-2 empirical Bayes: shrink each player's mean towards the average by n / (n + k
 R-3 composite: shrunk component residuals (boundary, dot, dismissal, extras) on pressure balls, each turned into runs
     and weighted by its reliability.
 """
+import os
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+import yaml
 from scipy.sparse.linalg import lsqr
+
+_CFG = yaml.safe_load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml"), encoding="utf-8"))
+# where empirical Bayes shrinks each player: 'data_mean' = the real average of the value being rated (its ball-weighted
+# mean in the data; 16 Nov 2026 review, config ratings.shrink_to) or 'zero' (the original: the average player = 0)
+SHRINK_TO = _CFG.get("ratings", {}).get("shrink_to", "zero")
 
 PCOL = {"bat": "striker_id", "bowl": "bowler_id"}
 K_MAX = 5000.0
@@ -59,6 +66,8 @@ def eb_shrink(d, k_mult=1.0, prior=0.0, weight=None, key=None):
         n = (g.w ** 2 / g.w2).values  # effective n
         s = (g["sum"] / g.w).values * n
     s2 = float(np.var(d.val.values))
+    if SHRINK_TO == "data_mean" and prior == 0.0:
+        prior = float(np.average(d.val.values, weights=None if weight is None else d[weight].values))
     tau2, k, rel = eb_params(s, n, s2)
     k *= k_mult
     if key is not None and K_FIXED is not None and key in K_FIXED:

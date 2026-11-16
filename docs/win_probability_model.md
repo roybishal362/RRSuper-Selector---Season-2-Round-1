@@ -4,6 +4,17 @@
 
 SupeRR Selector Season 2, Round 1 · Bishal Roy · November 2026
 
+> **Update, 16 Nov 2026.** The tables below come from the first data file. The organisers then issued a corrected ball-by-ball
+> file that records the real extra runs, and everything was re-run on it ([notebook 28](../notebooks/28_final_review_corrected_data.ipynb)).
+>
+> The conclusions are unchanged: the same logistic model is still the most accurate of the rivals on matches it never saw.
+> - **Final chase model, unseen matches:** log-loss 0.3935 → **0.3900**, AUC 0.901 → **0.903**, calibration error about 1%.
+> - **End-of-chase calibration error:** 2.9% → **1.8%**. The first file had 106 chases where the chasing side won although
+>   the rebuilt score never reached the target; the corrected file has none.
+> - **Best rival on unseen matches:** XGBoost at 0.395.
+> - **Memorisation test:** LightGBM on match-level inputs only scores 1.95 on new matches.
+> - **First-innings share of the rating weight:** 40%.
+
 ---
 
 ## 1. Summary
